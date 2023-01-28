@@ -5,7 +5,7 @@ import numpy as np
 import os
 path = os.getcwd()
 
-PROBLEM = os.path.join(path, "../../Brandimarte_Data/Mk02.fjs")
+PROBLEM = os.path.join(path, "../../Brandimarte_Data/Mk06.fjs")
 
 
 class Config:

@@ -38,7 +38,7 @@ def train_agent(args: Config):
 
     torch.set_grad_enabled(False)
     while True:
-        env.render()
+        #env.render()
         buffer_items = agent.explore_env(env, horizon_len)
         if if_off_policy:
             buffer.update(buffer_items)
