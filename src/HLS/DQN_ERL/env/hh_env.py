@@ -93,7 +93,7 @@ class hh_env(gym.Env):
             ck = 40
         delta = (self.prevTime - newTime) / self.prevTime + ck
         s_ = np.array([action, self.NOT_IMPROVED, delta])
-        return s_, reward, False, {}
+        return s_, reward, self.ITER > 5000, {}
 
     def stepTest(self, action):
         newSolution = self.heuristics[action](self.solution, self.parameters)

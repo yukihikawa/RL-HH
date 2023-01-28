@@ -64,7 +64,7 @@ class AgentDQN(AgentBase):
         dones = torch.zeros(horizon_len, dtype=torch.bool).to(self.device)
 
         ary_state = self.last_state
-        print("ary_state: ", ary_state)
+        #print("ary_state: ", ary_state)
         get_action = self.act.get_action
         for i in range(horizon_len):
             state = torch.as_tensor(ary_state, dtype=torch.float32, device=self.device)

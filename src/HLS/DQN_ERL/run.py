@@ -13,12 +13,13 @@ def train_agent(args: Config):
     agent = args.agent_class(args.net_dims, args.state_dim, args.action_dim, gpu_id=args.gpu_id, args=args)
     agent.last_state = env.reset()
 
+    # 初始化评估
     evaluator = Evaluator(eval_env=build_env(args.env_class, args.env_args),
                           eval_per_step=args.eval_per_step,
                           eval_times=args.eval_times,
                           cwd=args.cwd)
 
-    if args.if_off_policy:
+    if args.if_off_policy: # off-policy， 初始化 replay buffer
         buffer = ReplayBuffer(gpu_id=args.gpu_id,
                               max_size=args.buffer_size,
                               state_dim=args.state_dim,
@@ -29,7 +30,7 @@ def train_agent(args: Config):
         buffer = []
 
     '''start training'''
-    cwd = args.cwd
+    cwd = args.cwd # 保存模型的路径
     break_step = args.break_step
     horizon_len = args.horizon_len
     if_off_policy = args.if_off_policy
@@ -37,6 +38,7 @@ def train_agent(args: Config):
 
     torch.set_grad_enabled(False)
     while True:
+        env.render()
         buffer_items = agent.explore_env(env, horizon_len)
         if if_off_policy:
             buffer.update(buffer_items)
