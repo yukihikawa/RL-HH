@@ -3,9 +3,10 @@ import gym
 import torch
 import numpy as np
 import os
-path = os.getcwd()
 
-PROBLEM = os.path.join(path, "../../Brandimarte_Data/Mk06.fjs")
+
+FILE = "MK04"
+PROBLEM = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + FILE + ".fjs")
 
 
 class Config:
@@ -52,7 +53,7 @@ class Config:
         self.break_step = +np.inf  # break training if 'total_step > break_step'
 
         self.eval_times = int(32)  # number of times that get episodic cumulative return
-        self.eval_per_step = int(2e4)  # evaluate the agent per training steps
+        self.eval_per_step = int(1e4)  # evaluate the agent per training steps
 
     def init_before_training(self):
         np.random.seed(self.random_seed)
@@ -61,7 +62,7 @@ class Config:
         torch.set_default_dtype(torch.float32)
 
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{FILE}'
 
         if self.if_remove is None:  # remove or keep the history files
             self.if_remove = bool(input(f"| Arguments PRESS 'y' to REMOVE: {self.cwd}? ") == 'y')

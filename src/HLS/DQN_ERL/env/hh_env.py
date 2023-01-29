@@ -77,7 +77,7 @@ class hh_env(gym.Env):
                 #     reward = 0
                 # else:
                 #     reward = 0.005 * self.NOT_IMPROVED
-                # self.rewardMut += reward
+                self.rewardMut += reward
                 # reward = -1
                 # print("mut reward: ", reward)
 
