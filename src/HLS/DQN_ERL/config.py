@@ -5,8 +5,9 @@ import numpy as np
 import os
 
 
-FILE = "MK04"
-PROBLEM = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + FILE + ".fjs")
+PROBLEM = "MK02"
+PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
+
 
 
 class Config:
@@ -62,7 +63,7 @@ class Config:
         torch.set_default_dtype(torch.float32)
 
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{FILE}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{PROBLEM}'
 
         if self.if_remove is None:  # remove or keep the history files
             self.if_remove = bool(input(f"| Arguments PRESS 'y' to REMOVE: {self.cwd}? ") == 'y')

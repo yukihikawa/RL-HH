@@ -11,8 +11,11 @@ from src.HLS.DQN_ERL import config
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 
-problem_str = config.PROBLEM
 
+
+#10个问题的最优解区间
+IDEAL_TIME = {'MK01': (36, 42), 'MK02': (24, 32), 'MK03': (204, 211), 'MK04': (48, 81), 'MK05': (168, 186), 'MK06': (33, 86), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 369), 'MK10': (165, 296)}
+BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': (165, 296)}
 
 class hh_env(gym.Env):
     def __init__(self):
@@ -44,43 +47,85 @@ class hh_env(gym.Env):
     def step(self, action):
         self.callCount[action] += 1
         self.ITER += 1
-        termination = self.ITER > 5000
-        if termination:
-            self.render()
-        # print("in env: action: ", action)
-        # print(self.heuristics[action])
+
+
+
         newSolution = self.heuristics[action](self.solution, self.parameters)
         # prevTime = llh.timeTaken(self.solution, self.parameters)
         newTime = llh.timeTaken(newSolution, self.parameters)
-        # 状态定义为
+        termination = self.ITER > 5000 or newTime == self.TERMINATION_TIME
+
+
+        reward = self.reward(newTime, termination)
+
+        self.accept(newTime, newSolution)
+
 
         # 奖励函数
+        # if self.prevTime > newTime:
+        #     self.solution = newSolution
+        #     self.prevTime = newTime
+        #     if (self.bestTime > newTime):
+        #         self.best_solution = newSolution
+        #         self.bestTime = newTime
+        #     reward = 3 + self.NOT_IMPROVED * 0.02
+        #     self.rewardImp += reward
+        #     self.NOT_ACCEPTED = 1
+        #     self.NOT_IMPROVED = 1
+        # else:
+        #     self.NOT_IMPROVED += 1
+        #     if self.prevTime == newTime:
+        #         reward = 0
+        #     else:
+        #         # reward = self.NOT_IMPROVED * 10 / self.ITER
+        #         # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
+        #         reward = 0.1
+        #         # if self.NOT_IMPROVED <= 8:
+        #         #     reward = 0
+        #         # else:
+        #         #     reward = 0.005 * self.NOT_IMPROVED
+        #         self.rewardMut += reward
+        #         # reward = -1
+        #         # print("mut reward: ", reward)
+        #
+        #     # 解的接受
+        #     p = random.random()
+        #     temp = np.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED * 0.01))
+        #     if p < temp:
+        #         # print('accepted!')
+        #         self.solution = newSolution
+        #         self.prevTime = newTime
+        #         self.NOT_ACCEPTED = 1
+        #         self.NOT_IMPROVED = 1
+        #     else:
+        #         self.NOT_ACCEPTED += 1
+        #         self.NOT_IMPROVED += 1
+        # print("finish time: ", self.prevTime)
+        # 用 action 创建一个一维张量, 并且将其转换为整型
+        # s_ = np.array([action], dtype=np.int32)
+        if action in [3, 5, 6]:
+            # if action in [0, 1, 2]:
+            ck = 20
+        else:
+            ck = 40
+        delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
+        s_ = np.array([action, self.NOT_IMPROVED, delta])
+
+        if termination:
+            self.render()
+        return s_, reward, termination, {}
+
+    def accept(self, newTime, newSolution):
         if self.prevTime > newTime:
             self.solution = newSolution
             self.prevTime = newTime
             if (self.bestTime > newTime):
                 self.best_solution = newSolution
                 self.bestTime = newTime
-            reward = 3 + self.NOT_IMPROVED * 0.02
-            self.rewardImp += reward
             self.NOT_ACCEPTED = 1
             self.NOT_IMPROVED = 1
         else:
             self.NOT_IMPROVED += 1
-            if self.prevTime == newTime:
-                reward = 0
-            else:
-                # reward = self.NOT_IMPROVED * 10 / self.ITER
-                # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
-                reward = 0.1
-                # if self.NOT_IMPROVED <= 8:
-                #     reward = 0
-                # else:
-                #     reward = 0.005 * self.NOT_IMPROVED
-                self.rewardMut += reward
-                # reward = -1
-                # print("mut reward: ", reward)
-
             # 解的接受
             p = random.random()
             temp = np.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED * 0.01))
@@ -93,20 +138,42 @@ class hh_env(gym.Env):
             else:
                 self.NOT_ACCEPTED += 1
                 self.NOT_IMPROVED += 1
-        # print("finish time: ", self.prevTime)
-        # 用 action 创建一个一维张量, 并且将其转换为整型
-        # s_ = np.array([action], dtype=np.int32)
-        if action in [3, 5, 6]:
-            # if action in [0, 1, 2]:
-            ck = 20
+
+    def reward(self, newTime, termination):
+        if termination:
+            print(IDEAL_TIME[config.PROBLEM][0], " ", IDEAL_TIME[config.PROBLEM][1] + 1)
+            print(self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1))
+            if(self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+                finishRewardRate = 200
+            else:
+                finishRewardRate = 100
+            reward = (self.TERMINATION_TIME / newTime) * finishRewardRate
+            print("end reward: ", reward)
         else:
-            ck = 40
-        delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
-        s_ = np.array([action, self.NOT_IMPROVED, delta])
-        return s_, reward, termination, {}
+            if self.prevTime > newTime:
+                reward = 3 + self.NOT_IMPROVED * 0.1
+                self.rewardImp += reward
+                # print("imp ", self.rewardImp)
+            else:
+                if self.prevTime == newTime:
+                    reward = 0
+                else:
+                    # reward = self.NOT_IMPROVED * 10 / self.ITER
+                    # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
+                    reward = 0.1
+                    # if self.NOT_IMPROVED <= 8:
+                    #     reward = 0
+                    # else:
+                    #     reward = 0.005 * self.NOT_IMPROVED
+                    self.rewardMut += reward
+                    # reward = -1
+                    # print("mut reward: ", reward)
+        return reward
+
 
     def reset(self, **kwargs):
-        self.parameters = parser.parse(problem_str)
+        self.TERMINATION_TIME = BEST_TIME[config.PROBLEM]
+        self.parameters = parser.parse(config.PROBLEM_PATH)
         self.best_solution = self.solution = encoding.initializeResult(self.parameters)
         self.NOT_ACCEPTED = 1
         self.NOT_IMPROVED = 1

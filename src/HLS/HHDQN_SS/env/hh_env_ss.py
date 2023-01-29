@@ -10,7 +10,7 @@ from src.utils import parser, gantt
 import src.LLH.lowlevelheuristic as llh
 from src.HLH.HHDQN_SS import config
 
-problem_str = config.PROBLEM
+problem_str = config.PROBLEM_PATH
 
 # "C:\\Users\emg\PycharmProjects\GenFJSP\src\HLH\HHDQN\env\Mk01.fjs"
 class hh_env_ss(gym.Env):
