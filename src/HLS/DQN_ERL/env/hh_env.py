@@ -50,10 +50,11 @@ class hh_env(gym.Env):
         newSolution = self.heuristics[action](self.solution, self.parameters)
         # prevTime = llh.timeTaken(self.solution, self.parameters)
         newTime = llh.timeTaken(newSolution, self.parameters)
-        termination = self.ITER > 5000 or newTime == self.TERMINATION_TIME
+        #termination = self.ITER > 5000 or newTime == self.TERMINATION_TIME
+        termination = self.termination()
 
         # 奖励
-        reward = self.reward2(newTime)
+        reward = self.reward3(newTime)
         # 解的接受
         self.accept(newTime, newSolution)
 
@@ -67,7 +68,7 @@ class hh_env(gym.Env):
 
         if termination:
             self.render()
-            reward = self.endReward2()
+            reward = self.endReward3()
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution):
@@ -114,7 +115,6 @@ class hh_env(gym.Env):
                 # reward = -1
                 # print("mut reward: ", reward)
         return reward
-
     def endReward(self):
         if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
             finishRewardRate = 200
@@ -123,7 +123,6 @@ class hh_env(gym.Env):
         reward = (self.TERMINATION_TIME / self.bestTime) * finishRewardRate
         print("end reward: ", reward)
         return reward
-
     def reward2(self, newTime):
         if self.prevTime > newTime:
             reward = -0.5
@@ -136,7 +135,6 @@ class hh_env(gym.Env):
                 reward = -1
                 self.rewardMut += reward
         return reward
-
     def endReward2(self):
         if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
             finishRewardRate = 10000
@@ -145,7 +143,41 @@ class hh_env(gym.Env):
         reward = (self.TERMINATION_TIME / self.bestTime) * finishRewardRate
         print("end reward: ", reward)
         return reward
+    def reward3(self, newTime):
+        if self.prevTime > newTime:
+            reward = 3 + self.NOT_IMPROVED * 0.1
+            self.rewardImp += reward
+            # print("imp ", self.rewardImp)
+        else:
+            if self.prevTime == newTime:
+                reward = -0.02
+                self.rewardSta += reward
+            else:
+                # reward = self.NOT_IMPROVED * 10 / self.ITER
+                # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
+                reward = -0.01
+                # if self.NOT_IMPROVED <= 8:
+                #     reward = 0
+                # else:
+                #     reward = 0.005 * self.NOT_IMPROVED
+                self.rewardMut += reward
+                # reward = -1
+                # print("mut reward: ", reward)
+        return reward
+    def endReward3(self):
+        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+            finishRewardRate = 200
+        else:
+            finishRewardRate = 100
+        reward = (self.TERMINATION_TIME / self.bestTime) * finishRewardRate
+        print("end reward: ", reward)
+        return reward
 
+    def termination(self):
+        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+            return True
+        else:
+            return False
     def reset(self, **kwargs):
         self.TERMINATION_TIME = BEST_TIME[config.PROBLEM]
         self.parameters = parser.parse(config.PROBLEM_PATH)
