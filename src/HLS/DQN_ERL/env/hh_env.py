@@ -47,62 +47,16 @@ class hh_env(gym.Env):
     def step(self, action):
         self.callCount[action] += 1
         self.ITER += 1
-
-
-
         newSolution = self.heuristics[action](self.solution, self.parameters)
         # prevTime = llh.timeTaken(self.solution, self.parameters)
         newTime = llh.timeTaken(newSolution, self.parameters)
         termination = self.ITER > 5000 or newTime == self.TERMINATION_TIME
 
-
-        reward = self.reward(newTime, termination)
-
+        # 奖励
+        reward = self.reward2(newTime)
+        # 解的接受
         self.accept(newTime, newSolution)
 
-
-        # 奖励函数
-        # if self.prevTime > newTime:
-        #     self.solution = newSolution
-        #     self.prevTime = newTime
-        #     if (self.bestTime > newTime):
-        #         self.best_solution = newSolution
-        #         self.bestTime = newTime
-        #     reward = 3 + self.NOT_IMPROVED * 0.02
-        #     self.rewardImp += reward
-        #     self.NOT_ACCEPTED = 1
-        #     self.NOT_IMPROVED = 1
-        # else:
-        #     self.NOT_IMPROVED += 1
-        #     if self.prevTime == newTime:
-        #         reward = 0
-        #     else:
-        #         # reward = self.NOT_IMPROVED * 10 / self.ITER
-        #         # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
-        #         reward = 0.1
-        #         # if self.NOT_IMPROVED <= 8:
-        #         #     reward = 0
-        #         # else:
-        #         #     reward = 0.005 * self.NOT_IMPROVED
-        #         self.rewardMut += reward
-        #         # reward = -1
-        #         # print("mut reward: ", reward)
-        #
-        #     # 解的接受
-        #     p = random.random()
-        #     temp = np.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED * 0.01))
-        #     if p < temp:
-        #         # print('accepted!')
-        #         self.solution = newSolution
-        #         self.prevTime = newTime
-        #         self.NOT_ACCEPTED = 1
-        #         self.NOT_IMPROVED = 1
-        #     else:
-        #         self.NOT_ACCEPTED += 1
-        #         self.NOT_IMPROVED += 1
-        # print("finish time: ", self.prevTime)
-        # 用 action 创建一个一维张量, 并且将其转换为整型
-        # s_ = np.array([action], dtype=np.int32)
         if action in [3, 5, 6]:
             # if action in [0, 1, 2]:
             ck = 20
@@ -113,6 +67,7 @@ class hh_env(gym.Env):
 
         if termination:
             self.render()
+            reward = self.endReward2()
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution):
@@ -139,37 +94,57 @@ class hh_env(gym.Env):
                 self.NOT_ACCEPTED += 1
                 self.NOT_IMPROVED += 1
 
-    def reward(self, newTime, termination):
-        if termination:
-            print(IDEAL_TIME[config.PROBLEM][0], " ", IDEAL_TIME[config.PROBLEM][1] + 1)
-            print(self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1))
-            if(self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
-                finishRewardRate = 200
-            else:
-                finishRewardRate = 100
-            reward = (self.TERMINATION_TIME / newTime) * finishRewardRate
-            print("end reward: ", reward)
+    def reward(self, newTime):
+        if self.prevTime > newTime:
+            reward = 3 + self.NOT_IMPROVED * 0.1
+            self.rewardImp += reward
+            # print("imp ", self.rewardImp)
         else:
-            if self.prevTime > newTime:
-                reward = 3 + self.NOT_IMPROVED * 0.1
-                self.rewardImp += reward
-                # print("imp ", self.rewardImp)
+            if self.prevTime == newTime:
+                reward = 0
             else:
-                if self.prevTime == newTime:
-                    reward = 0
-                else:
-                    # reward = self.NOT_IMPROVED * 10 / self.ITER
-                    # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
-                    reward = 0.1
-                    # if self.NOT_IMPROVED <= 8:
-                    #     reward = 0
-                    # else:
-                    #     reward = 0.005 * self.NOT_IMPROVED
-                    self.rewardMut += reward
-                    # reward = -1
-                    # print("mut reward: ", reward)
+                # reward = self.NOT_IMPROVED * 10 / self.ITER
+                # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
+                reward = 0.1
+                # if self.NOT_IMPROVED <= 8:
+                #     reward = 0
+                # else:
+                #     reward = 0.005 * self.NOT_IMPROVED
+                self.rewardMut += reward
+                # reward = -1
+                # print("mut reward: ", reward)
         return reward
 
+    def endReward(self):
+        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+            finishRewardRate = 200
+        else:
+            finishRewardRate = 100
+        reward = (self.TERMINATION_TIME / self.bestTime) * finishRewardRate
+        print("end reward: ", reward)
+        return reward
+
+    def reward2(self, newTime):
+        if self.prevTime > newTime:
+            reward = -0.5
+            self.rewardImp += reward
+        else:
+            if self.prevTime == newTime:
+                reward = -2
+                self.rewardSta += reward
+            else:
+                reward = -1
+                self.rewardMut += reward
+        return reward
+
+    def endReward2(self):
+        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+            finishRewardRate = 10000
+        else:
+            finishRewardRate = 5000
+        reward = (self.TERMINATION_TIME / self.bestTime) * finishRewardRate
+        print("end reward: ", reward)
+        return reward
 
     def reset(self, **kwargs):
         self.TERMINATION_TIME = BEST_TIME[config.PROBLEM]
@@ -179,6 +154,7 @@ class hh_env(gym.Env):
         self.NOT_IMPROVED = 1
         self.rewardImp = 0
         self.rewardMut = 0
+        self.rewardSta = 0
         self.ITER = 1
         self.prevTime = self.bestTime = llh.timeTaken(self.solution, self.parameters)
         self.prevState = random.randint(0, 10)
@@ -190,7 +166,9 @@ class hh_env(gym.Env):
         print('LLH called: ')
         print(self.callCount)
         print('reward from improve: ', self.rewardImp)
+        print('reward from stay: ', self.rewardSta)
         print('reward from mutation: ', self.rewardMut)
+        print('total reward', self.rewardImp + self.rewardSta + self.rewardMut)
         print("finish time: ", self.bestTime)
         # gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
         # gantt.draw_chart(gantt_data)
