@@ -7,7 +7,7 @@ from gym import spaces
 
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
-from src.HLS.DQN_ERL import config
+from src.HLS.PPO_ERL.train import config
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 
@@ -45,9 +45,11 @@ class hh_env(gym.Env):
         # self.if_discrete = True  # discrete action or continuous action
 
     def step(self, action):
-        self.callCount[action] += 1
+        #action_c = np.argmax(action)
+        action_c = action
+        self.callCount[action_c] += 1
         self.ITER += 1
-        newSolution = self.heuristics[action](self.solution, self.parameters)
+        newSolution = self.heuristics[action_c](self.solution, self.parameters)
         # prevTime = llh.timeTaken(self.solution, self.parameters)
         newTime = llh.timeTaken(newSolution, self.parameters)
         #termination = self.ITER > 5000 or newTime == self.TERMINATION_TIME
@@ -58,13 +60,13 @@ class hh_env(gym.Env):
         # 解的接受
         self.accept(newTime, newSolution)
 
-        if action in [3, 5, 6]:
+        if action_c in [3, 5, 6]:
             # if action in [0, 1, 2]:
             ck = 20
         else:
             ck = 40
         delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
-        s_ = np.array([action, self.NOT_IMPROVED, delta])
+        s_ = np.array([action_c, self.NOT_IMPROVED, delta])
 
         if termination:
             self.render()
