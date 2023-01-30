@@ -72,6 +72,7 @@ class AgentDQN(AgentBase):
                 action = torch.randint(self.action_dim, size=(1,))[0]
             else:
                 action = get_action(state.unsqueeze(0))[0, 0]
+                print('action: ' + str(action))
 
             ary_action = action.detach().cpu().numpy()
             ary_state, reward, done, _ = env.step(ary_action)

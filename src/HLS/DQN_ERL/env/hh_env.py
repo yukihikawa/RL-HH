@@ -145,7 +145,7 @@ class hh_env(gym.Env):
         return reward
     def reward3(self, newTime):
         if self.prevTime > newTime:
-            reward = 3 + self.NOT_IMPROVED * 0.1
+            reward = 3 + self.NOT_IMPROVED * 0.1 + self.TERMINATION_TIME / (newTime - self.TERMINATION_TIME + 1)
             self.rewardImp += reward
             # print("imp ", self.rewardImp)
         else:
@@ -174,7 +174,7 @@ class hh_env(gym.Env):
         return reward
 
     def termination(self):
-        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+        if self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1) or self.ITER > 5000:
             return True
         else:
             return False
