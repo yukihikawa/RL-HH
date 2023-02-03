@@ -9,7 +9,7 @@ from multiprocessing import Pipe, Process
 
 '''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 
-PROBLEM = "MK02"
+PROBLEM = "MK06"
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 
 class Config:

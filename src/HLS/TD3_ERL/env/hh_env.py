@@ -46,6 +46,8 @@ class hh_env(gym.Env):
 
     def step(self, action):
         action_c = np.argmax(action)
+        #action_c = action
+
         self.callCount[action_c] += 1
         self.ITER += 1
         newSolution = self.heuristics[action_c](self.solution, self.parameters)
@@ -55,7 +57,7 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward(newTime)
+        reward = self.reward3(newTime)
         # 解的接受
         self.accept(newTime, newSolution)
 
@@ -69,7 +71,7 @@ class hh_env(gym.Env):
 
         if termination:
             self.render()
-            reward = self.endReward()
+            reward = self.endReward3()
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution):

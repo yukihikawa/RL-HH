@@ -7,7 +7,7 @@ from gym import spaces
 
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
-from src.HLS.PPO_ERL.train import config
+from src.HLS.DQN2_ERL.train import config
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 
@@ -56,7 +56,7 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward(newTime)
+        reward = self.reward3(newTime)
         # 解的接受
         self.accept(newTime, newSolution)
 
@@ -70,7 +70,7 @@ class hh_env(gym.Env):
 
         if termination:
             self.render()
-            reward = self.endReward()
+            reward = self.endReward3()
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution):

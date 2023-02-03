@@ -56,5 +56,5 @@ def train_ppo_for_fjsp(gpu_id=0):
 
 if __name__ == "__main__":
     GPU_ID = 0
-    train_ppo_for_lunar_lander()
-    #train_ppo_for_fjsp(gpu_id=GPU_ID)
+    #train_ppo_for_lunar_lander()
+    train_ppo_for_fjsp(gpu_id=GPU_ID)

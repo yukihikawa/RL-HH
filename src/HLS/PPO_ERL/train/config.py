@@ -1,4 +1,6 @@
 import os
+import time
+
 import torch
 import numpy as np
 from typing import List
@@ -88,7 +90,7 @@ class Config:
 
         '''set cwd (current working directory) for saving model'''
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{PROBLEM}_{time.time()}'
 
         '''remove history'''
         if self.if_remove is None:
