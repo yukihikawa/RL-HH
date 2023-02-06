@@ -23,12 +23,12 @@ def run(problem):
         # 子代种群变异
         childPop = gen_ops.mutate(childPop, config.P_MUT)
         # 将子代种群应用到 best_solution, 获取所有新解
-        new_solutions = gen_ops.applyPopulation(childPop, best_solution, parameters)
+        new_solutions, new_times = gen_ops.applyPopulation(childPop, best_solution, parameters)
         # 计算子代适应度
-        fitness = gen_ops.fitness(new_solutions, parameters, best_time)
+        fitness = gen_ops.fitness(new_times)
         # 接受更优接
         for i in range(len(new_solutions)):
-            new_time = timeTaken(new_solutions[i], parameters)
+            new_time = new_times[i]
             if new_time < best_time:
                 best_time = new_time
                 best_solution = new_solutions[i]

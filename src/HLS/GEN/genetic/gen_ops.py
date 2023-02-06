@@ -33,33 +33,39 @@ def applyChrom(chrom, solution, parameters):
         if cand_time < prev_time:
             prev_solution = cand_solution
             prev_time = cand_time
+            taboo = [0 for i in range(len(LLH))]
             if cand_time < b_time:
                 best_solution = cand_solution
                 b_time = cand_time
-                taboo = [0 for i in range(len(LLH))]
-                return best_solution
+                return best_solution, b_time
         else:
             taboo[i] = 1
             p = random.random()
             if p > 0.5 +  0.01 * i:
                 prev_solution = cand_solution
                 prev_time = cand_time
-    return best_solution
+    #print('bt: ', b_time)
+    return best_solution, b_time
 
 #将一个种群的染色体应用到解上,获取包含所有新解的列表
 def applyPopulation(population, solution, parameters):
     """Apply population to solution."""
     new_solutions = []
+    new_times = []
     for i in range(len(population)):
-        new_solutions.append(applyChrom(population[i], solution, parameters))
-    return new_solutions
+        ns, nt = applyChrom(population[i], solution, parameters)
+        #print('nt: ', nt, 'ns: ', ns)
+        new_solutions.append(ns)
+        new_times.append(nt)
+    #print(new_times)
+    return new_solutions, new_times
 
 # 适应度,返回种群的适应度列表
-def fitness(solutions, parameters, best_time):
+def fitness(times):
     """Calculate fitness."""
     fitness = []
-    for solution in solutions:
-        fitness.append(1 / timeTaken(solution, parameters))
+    for time in times:
+        fitness.append(1 / time)
     return fitness
 
 
