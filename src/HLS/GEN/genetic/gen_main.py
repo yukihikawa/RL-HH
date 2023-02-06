@@ -36,7 +36,7 @@ def run(problem):
                 print('new best time: ', best_time)
             elif new_time == best_time:
                 p = random.random()
-                if p < 0.01 * gen:
+                if p < 0.6 - 0.005 * gen:
                     best_time = new_time
                     best_solution = new_solutions[i]
                     print('new best time: ', best_time)
