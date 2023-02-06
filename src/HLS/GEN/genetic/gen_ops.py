@@ -4,7 +4,7 @@ from src.LLH.LLHolder import LLHolder, LLHolder2
 from src.LLH.LLHUtils import timeTaken
 
 
-LLH = LLHolder()
+LLH = LLHolder2()
 
 # 初始化高层启发式种群
 def initPopulation(popSize, chromLength):
@@ -37,7 +37,7 @@ def applyChrom(chrom, solution, parameters):
             if cand_time < b_time:
                 best_solution = cand_solution
                 b_time = cand_time
-                return best_solution, b_time
+                #return best_solution, b_time
         else:
             taboo[i] = 1
             p = random.random()
@@ -92,9 +92,12 @@ def rouletteSelection(population, fitness):
 # 选择适应度最佳的个体
 def bestSelection(population, fitness):
     """Select chromosome."""
-    return population[fitness.index(max(fitness))]
-def selection(population, fitness):
-    pass
+    idx = fitness.index(max(fitness))
+    selected = population[idx].copy()
+    del population[idx]
+    del fitness[idx]
+    return selected
+
 
 # 交叉操作
 # 使用等位基因交叉, 返回两个新染色体
