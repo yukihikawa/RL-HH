@@ -5,7 +5,7 @@ def testTwenty(PROBLEM):
     problem_path = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
     print('result for ', PROBLEM, ':')
     result = {}
-    for i in range(20):
+    for i in range(1):
         result[i] = gen_main.runForTest(problem_path)
     print(result)
 

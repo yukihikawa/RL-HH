@@ -1,3 +1,5 @@
+import random
+
 from src.utils.encoding import initializeResult
 from src.LLH.LLHUtils import timeTaken
 from src.utils.parser import parse
@@ -12,8 +14,8 @@ def run(problem):
     #初始化种群
     population = gen_ops.initPopulation(config.POP_SIZE, config.CHROM_LENGTH)
     #开始循环
-    for i in range(config.GEN_NUM):
-        print('generation: ', i, 'best time: ', best_time)
+    for gen in range(config.GEN_NUM):
+        print('generation: ', gen, 'best time: ', best_time)
         # 随机选出两个父代
         parentIdx1, parentIdx2 = gen_ops.randomSelection(population)
         chrom1, chrom2 = population[parentIdx1], population[parentIdx2]
@@ -32,6 +34,13 @@ def run(problem):
                 best_time = new_time
                 best_solution = new_solutions[i]
                 print('new best time: ', best_time)
+            elif new_time == best_time:
+                p = random.random()
+                if p < 0.01 * gen:
+                    best_time = new_time
+                    best_solution = new_solutions[i]
+                    print('new best time: ', best_time)
+
         #子代选择两个个体
         childChrom1 = gen_ops.bestSelection(childPop, fitness)
         childChrom2 = gen_ops.rouletteSelection(childPop, fitness)
