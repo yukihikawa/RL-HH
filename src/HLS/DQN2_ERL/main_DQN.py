@@ -20,7 +20,7 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'action_dim': 10,  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
     }
-    get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
+    #get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
     args = Config(agent_class, env_class, env_args)  # see `config.py Arguments()` for hyperparameter explanation
     args.break_step = int(1e6)  # break training if 'total_step > break_step'

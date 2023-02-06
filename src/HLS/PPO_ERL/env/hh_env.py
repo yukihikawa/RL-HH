@@ -46,6 +46,7 @@ class hh_env(gym.Env):
 
     def step(self, action):
         action_c = np.argmax(action)
+        #action_c = action
         self.callCount[action_c] += 1
         self.ITER += 1
         newSolution = self.heuristics[action_c](self.solution, self.parameters)
@@ -55,7 +56,7 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward(newTime)
+        reward = self.reward3(newTime)
         # 解的接受
         self.accept(newTime, newSolution)
 
@@ -69,7 +70,7 @@ class hh_env(gym.Env):
 
         if termination:
             self.render()
-            reward = self.endReward()
+            reward = self.endReward4()
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution):
@@ -174,8 +175,18 @@ class hh_env(gym.Env):
         print("end reward: ", reward)
         return reward
 
+    def endReward4(self):
+        #BestTime越小,奖励值越高
+        if (self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1)):
+            finishRewardRate = 150 - (self.bestTime - IDEAL_TIME[config.PROBLEM][0]) / (IDEAL_TIME[config.PROBLEM][1] - IDEAL_TIME[config.PROBLEM][0] + 1) * 50
+        else:
+            finishRewardRate = 100 - (self.bestTime - IDEAL_TIME[config.PROBLEM][1]) / (IDEAL_TIME[config.PROBLEM][1] - IDEAL_TIME[config.PROBLEM][0] + 1) * 200
+        print("end reward: ", finishRewardRate)
+        return finishRewardRate
+
     def termination(self):
-        if self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1] + 1) or self.ITER > 5000:
+        #if self.bestTime in range(IDEAL_TIME[config.PROBLEM][0], IDEAL_TIME[config.PROBLEM][1]) or self.ITER > 5000:
+        if self.bestTime <= IDEAL_TIME[config.PROBLEM][0] or self.ITER > 5000:
             return True
         else:
             return False

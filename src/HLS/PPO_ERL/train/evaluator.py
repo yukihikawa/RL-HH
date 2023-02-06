@@ -306,8 +306,8 @@ def draw_learning_curve(recorder: np.ndarray = None,
 
 def demo_evaluator_actor_pth():
     import gym
-    from elegantrl.agents.ppo import AgentPPO
-    from elegantrl.train.config import Config, build_env
+    from src.HLS.PPO_ERL.agents.AgentPPO import AgentPPO
+    from src.HLS.PPO_ERL.train.config import Config, build_env
 
     gpu_id = 0  # >=0 means GPU ID, -1 means CPU
 
@@ -345,7 +345,7 @@ def demo_evaluator_actor_pth():
 
 def demo_evaluate_actors(dir_path: str, gpu_id: int, agent, env_args: dict, eval_times=2, net_dim=128):
     import gym
-    from elegantrl.train.config import build_env
+    from src.HLS.PPO_ERL.train.config import build_env
     # dir_path = './LunarLanderContinuous-v2_PPO_1'
     # gpu_id = 0
     # agent_class = AgentPPO
@@ -391,70 +391,11 @@ def demo_evaluate_actors(dir_path: str, gpu_id: int, agent, env_args: dict, eval
     return step_epi_r_s_ary
 
 
-def demo_load_pendulum_and_render():
-    import torch
-    from elegantrl.agents.ppo import AgentPPO
-    from elegantrl.train.config import Config, build_env
 
-    gpu_id = 0  # >=0 means GPU ID, -1 means CPU
-
-    agent_class = AgentPPO
-
-    from elegantrl.envs.CustomGymEnv import PendulumEnv
-    env_class = PendulumEnv
-    env_args = {'env_num': 1,
-                'env_name': 'Pendulum-v1',
-                'state_dim': 3,
-                'action_dim': 1,
-                'if_discrete': False, }
-
-    actor_path = './Pendulum-v1_PPO_0/actor.pt'
-    net_dim = 2 ** 7
-
-    '''init'''
-    env = build_env(env_class=env_class, env_args=env_args)
-    args = Config(agent_class=agent_class, env_class=env_class, env_args=env_args)
-    act = agent_class(net_dim, env.state_dim, env.action_dim, gpu_id=gpu_id, args=args).act
-    act.load_state_dict(torch.load(actor_path, map_location=lambda storage, loc: storage))
-
-    '''evaluate'''
-    # eval_times = 2 ** 7
-    # from elegantrl.envs.CustomGymEnv import PendulumEnv
-    # eval_env = PendulumEnv()
-    # from elegantrl.train.evaluator import get_cumulative_returns_and_step
-    # r_s_ary = [get_cumulative_returns_and_step(eval_env, act) for _ in range(eval_times)]
-    # r_s_ary = np.array(r_s_ary, dtype=np.float32)
-    # r_avg, s_avg = r_s_ary.mean(axis=0)  # average of episode return and episode step
-    #
-    # print('r_avg, s_avg', r_avg, s_avg)
-
-    '''render'''
-    max_step = env.max_step
-    if_discrete = env.if_discrete
-    device = next(act.parameters()).device  # net.parameters() is a Python generator.
-
-    state = env.reset()
-    steps = None
-    returns = 0.0  # sum of rewards in an episode
-    for steps in range(max_step):
-        s_tensor = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-        a_tensor = act(s_tensor).argmax(dim=1) if if_discrete else act(s_tensor)
-        action = a_tensor.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
-        state, reward, done, _ = env.step(action * 2)  # for Pendulum specially
-        returns += reward
-        env.render()
-
-        if done:
-            break
-    returns = getattr(env, 'cumulative_returns', returns)
-    steps += 1
-
-    print(f"\n| cumulative_returns {returns}"
-          f"\n|      episode steps {steps}")
 
 
 def run():
-    from elegantrl.agents.ppo import AgentPPO
+    from src.HLS.PPO_ERL.agents.AgentPPO import AgentPPO
     flag_id = 1  # int(sys.argv[1])
 
     gpu_id = [2, 3][flag_id]
