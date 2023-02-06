@@ -1,9 +1,17 @@
-from src.HLS.GEN.genetic.gen_ops import *
+import src.HLS.GEN.genetic.gen_main as gen_main
 from src.HLS.GEN.genetic.config import *
-from src.utils.parser import parse
+
+def testTwenty(PROBLEM):
+    problem_path = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
+    print('result for ', PROBLEM, ':')
+    result = {}
+    for i in range(20):
+        result[i] = gen_main.runForTest(problem_path)
+    print(result)
 
 if __name__ == '__main__':
-    for PROBLEM in PROBLEM_SET:
-        problem_path = os.path.join(os.getcwd(), "../../../Brandimarte_Data/" + PROBLEM + ".fjs")
-        parameters = parse(problem_path)
+    testTwenty('MK02')
+
+
+
 
