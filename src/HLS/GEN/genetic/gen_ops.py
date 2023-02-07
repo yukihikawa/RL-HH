@@ -20,6 +20,37 @@ def applyChrom(chrom, solution, parameters):
     """Apply chromosome to solution."""
     (os, ms) = solution
     # 声明一个长度和 LLH 相同的禁忌列表
+    #taboo = [0 for i in range(len(LLH))]
+    prev_solution = best_solution = (os.copy(), ms.copy())
+    prev_time = b_time = timeTaken(best_solution, parameters)
+    for i in chrom:
+        # if sum(taboo) == len(LLH):
+        #     taboo = [0 for i in range(len(LLH))]
+        # if taboo[i] == 1:
+        #     continue
+        cand_solution = LLH[i](prev_solution, parameters)
+        cand_time = timeTaken(cand_solution, parameters)
+        if cand_time < prev_time:
+            prev_solution = cand_solution
+            prev_time = cand_time
+            #taboo = [0 for i in range(len(LLH))]
+            if cand_time < b_time:
+                best_solution = cand_solution
+                b_time = cand_time
+                #return best_solution, b_time
+        else:
+            #taboo[i] = 1
+            p = random.random()
+            if p > 0.5 +  0.01 * i:
+                prev_solution = cand_solution
+                prev_time = cand_time
+    #print('bt: ', b_time)
+    return best_solution, b_time
+
+def applyChromTabu(chrom, solution, parameters):
+    """Apply chromosome to solution."""
+    (os, ms) = solution
+    # 声明一个长度和 LLH 相同的禁忌列表
     taboo = [0 for i in range(len(LLH))]
     prev_solution = best_solution = (os.copy(), ms.copy())
     prev_time = b_time = timeTaken(best_solution, parameters)
