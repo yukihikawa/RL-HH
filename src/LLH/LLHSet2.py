@@ -61,7 +61,7 @@ def heuristic7(os_ms, parameters):
 
 
 # 变异算子
-# 1. 随机交换两个工序码, 返回新的工序码 已测
+# 随机交换两个工序码, 返回新的工序码 已测
 def heuristic1(os_ms, parameters=None):
     # print('1')
     # 随机选择两个不同机器码
@@ -75,7 +75,7 @@ def heuristic1(os_ms, parameters=None):
     return (newOs, ms)
 
 
-# 5. 随机改变单个机器码 已测
+# 随机改变单个机器码 已测
 def heuristic5(os_ms, parameters):
     (os, ms) = os_ms
     machineIdx = random.randint(0, len(ms) - 1)
@@ -83,7 +83,7 @@ def heuristic5(os_ms, parameters):
     return (os, changeMsRandom(machineIdx, ms, parameters))
 
 
-# 2. 随机反转工序码子序列 已测
+# 随机反转工序码子序列 已测
 def heuristic2(os_ms, parameters=None):
     (os, ms) = os_ms
     ida = idb = random.randint(0, len(os) - 2)

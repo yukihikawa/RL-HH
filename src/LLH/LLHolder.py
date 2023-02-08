@@ -1,6 +1,12 @@
 from src.LLH import LLHSet1, LLHSet2
 
-def LLHolder():
+def LLHolder(llhSet):
+    if llhSet == 1:
+        return llhset1()
+    elif llhSet == 2:
+        return llhset2()
+
+def llhset1():
     llhList = []
     llhList.append(LLHSet1.heuristic1)
     llhList.append(LLHSet1.heuristic2)
@@ -16,7 +22,7 @@ def LLHolder():
 
     return llhList
 
-def LLHolder2():
+def llhset2():
     llhList = []
     llhList.append(LLHSet2.heuristic4)
     llhList.append(LLHSet2.heuristic6)

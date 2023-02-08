@@ -1,22 +1,18 @@
 import random
-
-from src.LLH.LLHolder import LLHolder, LLHolder2
 from src.LLH.LLHUtils import timeTaken
 
 
-LLH = LLHolder2()
-
 # 初始化高层启发式种群
-def initPopulation(popSize, chromLength):
+def initPopulation(popSize, chromLength, len_llh):
     """Initialize population."""
     population = []
     for i in range(popSize):
-        population.append([random.randint(0, len(LLH) - 1) for j in range(chromLength)])
+        population.append([random.randint(0, len_llh - 1) for j in range(chromLength)])
     return population
 
 # 将染色体代表的 LHH 序列应用到 Solution 上,solution 是一个 (os, ms) 元组
 # 不修改原解,返回新解
-def applyChrom(chrom, solution, parameters):
+def applyChrom(chrom, solution, parameters, LLH):
     """Apply chromosome to solution."""
     (os, ms) = solution
     # 声明一个长度和 LLH 相同的禁忌列表
@@ -47,7 +43,7 @@ def applyChrom(chrom, solution, parameters):
     #print('bt: ', b_time)
     return best_solution, b_time
 
-def applyChromTabu(chrom, solution, parameters):
+def applyChromTabu(chrom, solution, parameters, LLH):
     """Apply chromosome to solution."""
     (os, ms) = solution
     # 声明一个长度和 LLH 相同的禁忌列表
@@ -79,12 +75,12 @@ def applyChromTabu(chrom, solution, parameters):
     return best_solution, b_time
 
 #将一个种群的染色体应用到解上,获取包含所有新解的列表
-def applyPopulation(population, solution, parameters):
+def applyPopulation(population, solution, parameters, LLH):
     """Apply population to solution."""
     new_solutions = []
     new_times = []
     for i in range(len(population)):
-        ns, nt = applyChrom(population[i], solution, parameters)
+        ns, nt = applyChromTabu(population[i], solution, parameters, LLH)
         #print('nt: ', nt, 'ns: ', ns)
         new_solutions.append(ns)
         new_times.append(nt)
@@ -141,7 +137,7 @@ def crossoverTP(chrom1, chrom2):
     newChrom2 = chrom2[0:pos1] + chrom1[pos1:pos2] + chrom2[pos2:]
     return newChrom1, newChrom2
 
-# 用给定的两个染色体进行 2n 次操作, 返回新的候选种群
+# 用给定的两个染色体进行 n 次操作, 返回新的候选种群
 def crossover(chrom1, chrom2, cross_times):
     new_population = []
     for i in range(cross_times):
@@ -152,16 +148,16 @@ def crossover(chrom1, chrom2, cross_times):
 
 # 变异操作
 #对传入的单个染色体进行变异
-def singleMutate(chrom, pm):
+def singleMutate(chrom, pm, len_llh):
     new_chrom = chrom.copy()
     for i in range(len(new_chrom)):
         if random.random() < pm:
-            new_chrom[i] = random.randint(0, len(LLH) - 1)
+            new_chrom[i] = random.randint(0, len_llh - 1)
     return new_chrom
 
 #对传入的种群执行变异操作
-def mutate(population, pm):
+def mutate(population, pm, len_llh):
     new_population = []
     for i in range(len(population)):
-        new_population.append(singleMutate(population[i], pm))
+        new_population.append(singleMutate(population[i], pm, len_llh))
     return new_population
