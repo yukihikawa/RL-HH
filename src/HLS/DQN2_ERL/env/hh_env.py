@@ -85,7 +85,7 @@ class hh_env(gym.Env):
             if (self.bestTime > newTime):
                 self.best_solution = newSolution
                 self.bestTime = newTime
-                print("new bestTime: ", self.bestTime)
+                print("iter: ", self.ITER, "new bestTime: ", self.bestTime)
             self.NOT_ACCEPTED = 1
             self.NOT_IMPROVED = 1
         elif self.prevTime < newTime:

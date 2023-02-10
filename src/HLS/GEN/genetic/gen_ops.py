@@ -95,6 +95,18 @@ def fitness(times):
         fitness.append(1 / time)
     return fitness
 
+#对种群并行执行applyChromTabu
+def applyPopulationParallel(population, solution, parameters, LLH):
+    """Apply population to solution."""
+    new_solutions = []
+    new_times = []
+    for i in range(len(population)):
+        ns, nt = applyChromTabu(population[i], solution, parameters, LLH)
+        #print('nt: ', nt, 'ns: ', ns)
+        new_solutions.append(ns)
+        new_times.append(nt)
+    #print(new_times)
+    return new_solutions, new_times
 
 
 # 选择操作
