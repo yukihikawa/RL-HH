@@ -1,15 +1,16 @@
 import threading
 import time
 import random
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import wait, ALL_COMPLETED
 
 from src.LLH.LLHUtils import timeTaken
 
 
 class apply:
-    def __init__(self, solution, parameters, LLH):
+    def __init__(self, solution, parameters, pool, LLH):
         self.solution = solution
         self.parameters = parameters
+        self.pool = pool
         self.LLH = LLH
         self.new_solution = []
         self.new_time = []
@@ -45,9 +46,10 @@ class apply:
         print('bt: ', b_time)
         return best_solution
     def applyPopulation(self, population):
-        pool = ThreadPoolExecutor(max_workers=len(population))
+
         futures = []
         for chrom in population:
-            futures.append(pool.submit(self.applyChromTabu, chrom))
-        pool.shutdown(wait=True)
+            futures.append(self.pool.submit(self.applyChromTabu, chrom))
+
+        wait(futures, return_when=ALL_COMPLETED)
         return [future.result() for future in futures]
