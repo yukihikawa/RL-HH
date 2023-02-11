@@ -14,7 +14,7 @@ from src.utils import parser
 
 #10个问题的最优解区间
 IDEAL_TIME = {'MK01': (36, 42), 'MK02': (27, 32), 'MK03': (204, 211), 'MK04': (60, 81), 'MK05': (168, 186), 'MK06': (60, 86), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 369), 'MK10': (165, 296)}
-BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': (165, 296)}
+BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': 197}
 
 class hh_env(gym.Env):
     def __init__(self, problem = '', problem_path = '', llh_set = 1, solve_iter = 5000):

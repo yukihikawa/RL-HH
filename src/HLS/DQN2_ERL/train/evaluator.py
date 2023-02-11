@@ -213,6 +213,7 @@ def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, 
     steps = None
     returns = 0.0  # sum of rewards in an episode
     result = {}
+    t1 = time.time()
     for steps in range(max_step):
         tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         tensor_action = actor(tensor_state)
@@ -227,6 +228,8 @@ def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, 
             time.sleep(0.02)
 
         if done:
+            t2 = time.time()
+            print("time: ", t2 - t1)
             break
     else:
         print("| get_rewards_and_step: WARNING. max_step > 12345")
