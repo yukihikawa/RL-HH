@@ -1,5 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import src.HLS.GEN.genetic.gen_main as gen_main
 from src.HLS.GEN.genetic import gen_ops
+from src.HLS.GEN.genetic.applyPopParallel import apply
 from src.HLS.GEN.genetic.config import *
 from src.LLH.LLHUtils import timeTaken
 from src.LLH.LLHolder import LLHolder
@@ -12,7 +15,7 @@ def test(TEST_ITER, PROBLEM, genNum, chromLength, popSize, crossTimes, pMut, llh
     LLH = LLHolder(LLH_SET)
     result = {}
     for i in range(TEST_ITER):
-        result[i] = runForTest(problem_path, genNum, chromLength, popSize, crossTimes, pMut, LLH)
+        result[i] = runForTestPara(problem_path, genNum, chromLength, popSize, crossTimes, pMut, LLH)
         print(result[i])
     print('genNum: ', genNum, 'chromLength: ', chromLength, 'popSize: ', popSize, 'cross times: ', crossTimes, 'pM: ', pMut, 'LLH Set: ', llh_set)
     print('result for ', PROBLEM, ':')
@@ -44,7 +47,36 @@ def runForTest(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
     return best_time
 
-
+def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
+    parameters = parse(problem)
+    best_solution = initializeResult(parameters)
+    best_time = timeTaken(best_solution, parameters)
+    population = gen_ops.initPopulation(popSize, chromLength, len(LLH))
+    pool = ThreadPoolExecutor(max_workers=crossTimes * 2)
+    applier = apply(best_solution, parameters, pool, LLH)
+    for gen in range(genNum):
+        if gen % 5 == 0:
+            print('generation: ', gen, 'best time: ', best_time)
+        parentIdx1, parentIdx2 = gen_ops.randomSelection(population)
+        chrom1, chrom2 = population[parentIdx1], population[parentIdx2]
+        childPop = gen_ops.crossover(chrom1, chrom2, crossTimes)
+        childPop = gen_ops.mutate(childPop, pMut, len(LLH))
+        applier.solution = best_solution
+        new_solutions = applier.applyPopulation(childPop)
+        new_times = []
+        fitness = []
+        for solution in new_solutions:
+            newTime = timeTaken(solution, parameters)
+            new_times.append(newTime)
+            fitness.append(1 / newTime)
+        idx = new_times.index(min(new_times))
+        # if new_times[idx] < best_time:
+        best_time = new_times[idx]
+        best_solution = new_solutions[idx]
+        childChrom1 = gen_ops.bestSelection(childPop, fitness)
+        childChrom2 = gen_ops.rouletteSelection(childPop, fitness)
+        population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
+    return best_time
 
 
 

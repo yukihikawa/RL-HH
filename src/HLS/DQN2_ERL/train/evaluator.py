@@ -191,6 +191,50 @@ def get_rewards_and_steps(env, actor, if_render: bool = False) -> (float, int):
     steps += 1
     return returns, steps
 
+def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, int):
+    """Usage
+    eval_times = 4
+    net_dim = 2 ** 7
+    actor_path = './LunarLanderContinuous-v2_PPO_1/actor.pt'
+
+    env = build_env(env_class=env_class, env_args=env_args)
+    act = agent(net_dim, env.state_dim, env.action_dim, gpu_id=gpu_id).act
+    act.load_state_dict(torch.load(actor_path, map_location=lambda storage, loc: storage))
+
+    r_s_ary = [get_episode_return_and_step(env, act) for _ in range(eval_times)]
+    r_s_ary = np.array(r_s_ary, dtype=np.float32)
+    r_avg, s_avg = r_s_ary.mean(axis=0)  # average of episode return and episode step
+    """
+    max_step = env.max_step
+    if_discrete = env.if_discrete
+    device = next(actor.parameters()).device  # net.parameters() is a Python generator.
+
+    state = env.reset()
+    steps = None
+    returns = 0.0  # sum of rewards in an episode
+    result = {}
+    for steps in range(max_step):
+        tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+        tensor_action = actor(tensor_state)
+        if if_discrete:
+            tensor_action = tensor_action.argmax(dim=1)
+        action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
+        state, reward, done, result = env.step(action)
+        returns += reward
+
+        if if_render:
+            env.render()
+            time.sleep(0.02)
+
+        if done:
+            break
+    else:
+        print("| get_rewards_and_step: WARNING. max_step > 12345")
+    returns = getattr(env, 'cumulative_returns', returns)
+    steps += 1
+
+    return returns, steps, result['bestTime']
+
 
 def get_rewards_and_step_from_vec_env(env, actor) -> [(float, float)]:
     device = env.device

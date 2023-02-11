@@ -9,8 +9,7 @@ from multiprocessing import Pipe, Process
 
 
 
-PROBLEM = "MK09"
-PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
+
 
 class Config:
     def __init__(self, agent_class=None, env_class=None, env_args=None):
@@ -27,7 +26,8 @@ class Config:
                         'max_step': 12345,
                         'state_dim': None,
                         'action_dim': None,
-                        'if_discrete': None, }
+                        'if_discrete': None,
+                        'problem': None}
         env_args.setdefault('num_envs', 1)  # `num_envs=1` in default in single env.
         env_args.setdefault('max_step', 12345)  # `max_step=12345` in default, which is a large enough value.
         self.env_name = env_args['env_name']  # the name of environment. Be used to set 'cwd'.
@@ -36,6 +36,7 @@ class Config:
         self.state_dim = env_args['state_dim']  # vector dimension (feature number) of state
         self.action_dim = env_args['action_dim']  # vector dimension (feature number) of action
         self.if_discrete = env_args['if_discrete']  # discrete or continuous action space
+        self.problem = env_args['problem']  # discrete or continuous action space
 
         '''Arguments for reward shaping'''
         self.gamma = 0.99  # discount factor of future rewards
@@ -90,7 +91,7 @@ class Config:
 
         '''set cwd (current working directory) for saving model'''
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{PROBLEM}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{self.problem}'
 
         '''remove history'''
         if self.if_remove is None:
@@ -130,8 +131,10 @@ def build_env(env_class=None, env_args: dict = None, gpu_id: int = -1):
     env_args.setdefault('num_envs', 1)
     env_args.setdefault('max_step', 12345)
 
-    for attr_str in ('env_name', 'num_envs', 'max_step', 'state_dim', 'action_dim', 'if_discrete'):
+    for attr_str in ('env_name', 'num_envs', 'max_step', 'state_dim', 'action_dim', 'if_discrete', 'problem', 'problem_path'):
         setattr(env, attr_str, env_args[attr_str])
+    for attr_str in ('problem', 'problem_path', 'llh_set', 'solve_iter'):
+        setattr(env.unwrapped, attr_str, env_args[attr_str])
     return env
 
 

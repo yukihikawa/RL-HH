@@ -2,7 +2,7 @@ import os
 import gym
 import torch
 
-from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps
+from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN
@@ -11,6 +11,9 @@ from env import hh_env
 
 gym.logger.set_level(40)  # Block warning
 
+PROBLEM = 'MK02'
+LLH_SET = 1
+SOLVE_ITER = 5000
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
@@ -20,10 +23,13 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'env_name': 'hh_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
-        'state_dim': 3,  # (CartPosition, CartVelocity, PoleAngle, PoleAngleVelocity)
-        'action_dim': len(LLHolder(hh_env.LLH_SET)),  # (Push cart to the left, Push cart to the right)
+        'state_dim': 3,
+        'action_dim': len(LLHolder(LLH_SET)),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
-
+        'problem': PROBLEM,
+        'problem_path': os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs"),
+        'llh_set': LLH_SET,
+        'solve_iter': SOLVE_ITER
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
@@ -35,10 +41,10 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
     args.eval_per_step = int(1e4)
     actor_path = f"./hh_env-v0_DQN_0_MK02"
 
-    render_agent(env_class, env_args, args.net_dims, agent_class, actor_path)
+    render_agent(env_class, env_args, args.net_dims, agent_class, actor_path, render_times=2)
 
 
-def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_path: str, render_times: int = 8):
+def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_path: str, render_times: int = 10):
     env = build_env(env_class, env_args)
 
     state_dim = env_args['state_dim']
@@ -50,9 +56,13 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
 
     # print(f"| render and load actor from: {actor_path}")
     # actor.load_state_dict(torch.load(actor_path, map_location=lambda storage, loc: storage))
+    allResult = {}
     for i in range(render_times):
-        cumulative_reward, episode_step = get_rewards_and_steps(env, actor, if_render=False)
+        cumulative_reward, episode_step, bestTime = get_rewards_and_steps_solve(env, actor, if_render=False)
         print(f"|{i:4}  cumulative_reward {cumulative_reward:9.3f}  episode_step {episode_step:5.0f}")
+        allResult['test ' + str(i)] = bestTime
+    print(allResult.values())
+
 
 
 if __name__ == "__main__":

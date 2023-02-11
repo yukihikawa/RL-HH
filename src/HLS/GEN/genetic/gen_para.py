@@ -1,4 +1,5 @@
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
@@ -18,7 +19,8 @@ def run(problem):
     LLH = LLHolder(config.LLH_SET)
     #初始化种群
     population = gen_ops.initPopulation(config.POP_SIZE, config.CHROM_LENGTH, len(LLH))
-    applier = apply(best_solution, parameters, LLH)
+    pool = ThreadPoolExecutor(max_workers=config.CROSS_TIMES * 2)
+    applier = apply(best_solution, parameters, pool, LLH)
     #开始循环
     for gen in range(config.GEN_NUM):
         print('generation: ', gen, 'best time: ', best_time)

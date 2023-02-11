@@ -4,8 +4,7 @@ from copy import deepcopy
 from torch import Tensor
 
 from src.HLS.DQN2_ERL.agents.AgentBase import AgentBase
-from src.HLS.DQN2_ERL.agents.net import QNet, QNetDuel
-from src.HLS.DQN2_ERL.agents.net import QNetTwin, QNetTwinDuel
+from src.HLS.DQN2_ERL.agents.net import QNet
 from src.HLS.DQN2_ERL.train.config import Config
 from src.HLS.DQN2_ERL.train.replay_buffer import ReplayBuffer
 
@@ -160,69 +159,3 @@ class AgentDQN(AgentBase):  # [ElegantRL.2022.04.18]
         buffer.td_error_update(td_error.detach())
         return obj_critic, q_value
 
-
-class AgentDoubleDQN(AgentDQN):
-    """
-    Double Deep Q-Network algorithm. “Deep Reinforcement Learning with Double Q-learning”. H. V. Hasselt et al.. 2015.
-    """
-
-    def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
-        self.act_class = getattr(self, "act_class", QNetTwin)
-        self.cri_class = getattr(self, "cri_class", None)  # means `self.cri = self.act`
-        super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
-
-    def get_obj_critic_raw(self, buffer: ReplayBuffer, batch_size: int) -> Tuple[Tensor, Tensor]:
-        """
-        Calculate the loss of the network and predict Q values with **uniform sampling**.
-
-        :param buffer: the ReplayBuffer instance that stores the trajectories.
-        :param batch_size: the size of batch data for Stochastic Gradient Descent (SGD).
-        :return: the loss of the network and Q values.
-        """
-        with torch.no_grad():
-            state, action, reward, undone, next_s = buffer.sample(batch_size)
-
-            next_q = torch.min(*self.cri_target.get_q1_q2(next_s)).max(dim=1, keepdim=True)[0].squeeze(1)
-            q_label = reward + undone * self.gamma * next_q
-
-        q1, q2 = [qs.gather(1, action.long()).squeeze(1) for qs in self.act.get_q1_q2(state)]
-        obj_critic = self.criterion(q1, q_label) + self.criterion(q2, q_label)
-        return obj_critic, q1
-
-    def get_obj_critic_per(self, buffer: ReplayBuffer, batch_size: int) -> Tuple[Tensor, Tensor]:
-        """
-        Calculate the loss of the network and predict Q values with **Prioritized Experience Replay (PER)**.
-
-        :param buffer: the ReplayBuffer instance that stores the trajectories.
-        :param batch_size: the size of batch data for Stochastic Gradient Descent (SGD).
-        :return: the loss of the network and Q values.
-        """
-        with torch.no_grad():
-            state, action, reward, undone, next_s, is_weights = buffer.sample(batch_size)
-
-            next_q = torch.min(*self.cri_target.get_q1_q2(next_s)).max(dim=1, keepdim=True)[0].squeeze(1)
-            q_label = reward + undone * self.gamma * next_q
-
-        q1, q2 = [qs.gather(1, action.long()).squeeze(1) for qs in self.act.get_q1_q2(state)]
-        td_error = self.criterion(q1, q_label) + self.criterion(q2, q_label)
-        obj_critic = (td_error * is_weights).mean()
-
-        buffer.td_error_update(td_error.detach())
-        return obj_critic, q1
-
-
-'''add dueling q network'''
-
-
-class AgentDuelingDQN(AgentDQN):
-    def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
-        self.act_class = getattr(self, "act_class", QNetDuel)
-        self.cri_class = getattr(self, "cri_class", None)  # means `self.cri = self.act`
-        super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
-
-
-class AgentD3QN(AgentDoubleDQN):  # Dueling Double Deep Q Network. (D3QN)
-    def __init__(self, net_dims: [int], state_dim: int, action_dim: int, gpu_id: int = 0, args: Config = Config()):
-        self.act_class = getattr(self, "act_class", QNetTwinDuel)
-        self.cri_class = getattr(self, "cri_class", None)  # means `self.cri = self.act`
-        super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)

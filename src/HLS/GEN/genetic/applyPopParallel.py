@@ -43,7 +43,7 @@ class apply:
                 if p > 0.5 + 0.01 * i:
                     prev_solution = cand_solution
                     prev_time = cand_time
-        print('bt: ', b_time)
+        #print('bt: ', b_time)
         return best_solution
     def applyPopulation(self, population):
 

@@ -1,12 +1,17 @@
 import os
 import gym
-from train.config import Config, get_gym_env_args
+
+from src.LLH.LLHolder import LLHolder
+from train.config import Config
 from agents.AgentDQN import AgentDQN
-from train.run import train_agent, render_agent
+from train.run import train_agent
 from env import hh_env
 gym.logger.set_level(40)  # Block warning
 
 
+PROBLEM = 'MK02'
+LLH_SET = 1
+SOLVE_ITER = 5000
 
 
 def train_dqn_for_hyper_heuristic(gpu_id=0):
@@ -16,9 +21,13 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'env_name': 'hh_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
-        'state_dim': 3,  # (CartPosition, CartVelocity, PoleAngle, PoleAngleVelocity)
-        'action_dim': 8,  # (Push cart to the left, Push cart to the right)
+        'state_dim': 3,
+        'action_dim': len(LLHolder(LLH_SET)),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
+        'problem': PROBLEM,
+        'problem_path': os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs"),
+        'llh_set': LLH_SET,
+        'solve_iter': SOLVE_ITER
     }
     #get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 

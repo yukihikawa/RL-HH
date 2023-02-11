@@ -1,4 +1,5 @@
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
@@ -10,6 +11,7 @@ import src.HLS.GEN.genetic.config as config
 
 # 运行遗传算法
 def run(problem):
+
     print(config.PROBLEM)
     print('gen:', config.GEN_NUM, 'chrom: ', config.CHROM_LENGTH, 'llh: ', config.LLH_SET)
     parameters = parse(problem)
