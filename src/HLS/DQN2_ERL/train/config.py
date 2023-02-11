@@ -7,9 +7,9 @@ from typing import List
 from torch import Tensor
 from multiprocessing import Pipe, Process
 
-'''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 
-PROBLEM = "MK02"
+
+PROBLEM = "MK09"
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 
 class Config:
@@ -69,7 +69,7 @@ class Config:
 
         '''Arguments for evaluate'''
         self.cwd = None  # current working directory to save model. None means set automatically
-        self.if_remove = True  # remove the cwd folder? (True, False, None:ask me)
+        self.if_remove = None  # remove the cwd folder? (True, False, None:ask me)
         self.break_step = np.inf  # break training if 'total_step > break_step'
         self.break_score = np.inf  # break training if `cumulative_rewards > break_score`
         self.if_keep_save = True  # keeping save the checkpoint. False means save until stop training.
@@ -90,7 +90,7 @@ class Config:
 
         '''set cwd (current working directory) for saving model'''
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{PROBLEM}_{time.time()}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{PROBLEM}'
 
         '''remove history'''
         if self.if_remove is None:

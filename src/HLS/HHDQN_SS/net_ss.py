@@ -3,7 +3,7 @@ import numpy as np
 from torch import nn
 import torch.nn.functional as F
 import torch
-from src.HLH.HHDQN_SS.env import hh_env_ss
+from src.HLS.HHDQN_SS.env import hh_env
 # 超参数
 BATCH_SIZE = 32 # 批训练的数据个数
 LR = 0.05 # 学习率
@@ -12,7 +12,7 @@ GAMMA = 0.9 # 奖励递减值
 TARGET_REPLACE_ITER = 100 # Q 现实网络的更新频率
 MEMORY_CAPACITY = 4000 # 记忆库大小
 
-myenv = gym.make('hh_env_ss-v0')
+myenv = gym.make('hh_env-v0')
 
 N_ACTIONS = myenv.action_space.n # 获取动作的个数(10),输出维度
 N_STATES = myenv.observation_space.shape[0] # 获取状态的个数(4),输入维度

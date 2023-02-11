@@ -7,6 +7,7 @@ from src.utils.parser import parse
 import src.HLS.GEN.genetic.gen_ops as gen_ops
 import src.HLS.GEN.genetic.config as config
 
+
 # 运行遗传算法
 def run(problem):
     print(config.PROBLEM)

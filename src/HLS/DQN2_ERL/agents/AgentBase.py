@@ -292,6 +292,7 @@ class AgentBase:
                 torch.save(getattr(self, attr_name), save_path)
             elif os.path.isfile(save_path):
                 setattr(self, attr_name, torch.load(save_path, map_location=self.device))
+                print(f"load {attr_name} from {save_path}")
 
 
 def get_optim_param(optimizer: torch.optim) -> list:  # backup

@@ -3,9 +3,9 @@ from gen_test import test
 PROBLEM = 'MK08'
 POP_SIZE = 50
 CHROM_LENGTH = 30
-GEN_NUM = 50
+GEN_NUM = 40
 P_MUT = 0.3
-CROSS_TIMES = 3
+CROSS_TIMES = 7
 TEST_ITER = 10
 LLH_SET = 1
 
