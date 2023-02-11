@@ -4,14 +4,14 @@ import torch
 
 from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHolder import LLHolder
-from train.config import Config, get_gym_env_args, build_env
-from agents.AgentDQN import AgentDQN
-from train.run import train_agent
-from env import hh_env
+from src.HLS.DQN2_ERL.train.config import Config, get_gym_env_args, build_env
+from src.HLS.DQN2_ERL.agents.AgentDQN import AgentDQN
+from src.HLS.DQN2_ERL.train.run import train_agent
+from src.HLS.DQN2_ERL.env import hh_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK04'
+PROBLEM = 'MK03'
 LLH_SET = 1
 SOLVE_ITER = 5000
 RENDER_TIMES = 10
@@ -40,7 +40,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
     args.eval_per_step = int(1e4)
-    actor_path = f"./hh_env-v0_DQN_0_MK02"
+    actor_path = f"../../../HLS/DQN2_ERL/hh_env-v0_DQN_0_MK02"
 
     render_agent(env_class, env_args, args.net_dims, agent_class, actor_path, render_times=RENDER_TIMES)
 
