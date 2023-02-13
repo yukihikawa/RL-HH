@@ -15,19 +15,20 @@ def generateOS(parameters):
             OS.append(i)
         i = i + 1
 
-    random.shuffle(OS)  # 随机打乱位置
+    #random.shuffle(OS)  # 随机打乱位置
 
     return OS
 
 
-# 生成机器码
+# 确定性生成机器码
 def generateMS(parameters):
     jobs = parameters['jobs']
 
     MS = []
     for job in jobs:  # 遍历每个工序
         for op in job:  # 遍历工序的可选机器列表
-            randomMachine = random.randint(0, len(op) - 1)  # 随机选取一个可选机器
+            #randomMachine = random.randint(0, len(op) - 1)  # 随机选取一个可选机器
+            randomMachine = 0
             MS.append(randomMachine)  # 加入机器码序列
     return MS
 
