@@ -10,6 +10,7 @@ class LLHSet4:
         # self.ms_tabu = [0 for i in range(0, len(init_solution[1]))]
         self.ms_tabu = None
         self.os_tabu = None
+        self.os_tabu2 = None
         self.llh = []
         self.llh.append(self.heuristic1)
         self.llh.append(self.heuristic2A)
@@ -32,11 +33,17 @@ class LLHSet4:
     def check_tabu(self, solution):
         if self.os_tabu is None:
             self.os_tabu = [0 for i in range(0, len(solution[0]))]
-        # 如果 os_tabu 各元素之和等于列表长度,将其全部赋值为 0
+        if self.os_tabu2 is None:
+            self.os_tabu2 = [0 for i in range(0, len(solution[0]))]
         if self.ms_tabu is None:
             self.ms_tabu = [0 for i in range(0, len(solution[1]))]
+
+        # 如果 os_tabu 各元素之和等于列表长度,将其全部赋值为 0
         if sum(self.os_tabu) == len(self.os_tabu):
             self.os_tabu = [0 for i in range(0, len(self.os_tabu))]
+        # 如果 os_tabu2 各元素之和等于列表长度,将其全部赋值为 0
+        if sum(self.os_tabu2) == len(self.os_tabu2):
+            self.os_tabu2 = [0 for i in range(0, len(self.os_tabu2))]
         # 如果 ms_tabu 各元素之和等于列表长度,将其全部赋值为 0
         if sum(self.ms_tabu) == len(self.ms_tabu):
             self.ms_tabu = [0 for i in range(0, len(self.ms_tabu))]
@@ -112,14 +119,15 @@ class LLHSet4:
 
     # 3. 并行局部搜索
     def heuristic3(self, os_ms, parameters):
+        #print('called!')
         self.check_tabu(os_ms)
         (os, ms) = os_ms
         tos = os.copy()
         tms = ms.copy()
         # print(tos)
         # idx = random.randint(0, len(tos) - 1)
-        idx = self.get_randon_zero_index(self.os_tabu)
-        self.os_tabu[idx] = 1
+        idx = self.get_randon_zero_index(self.os_tabu2)
+        self.os_tabu2[idx] = 1
 
         bestTime = timeTaken((tos, ms), parameters)
         # print('selected position: ', idx)

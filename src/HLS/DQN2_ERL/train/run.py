@@ -60,9 +60,9 @@ def train_agent(args: Config):
     '''init evaluator'''
     eval_env_class = args.eval_env_class if args.eval_env_class else args.env_class
     eval_env_args = args.eval_env_args if args.eval_env_args else args.env_args
-    eval_env = eval_env_args.copy()
-    eval_env['train'] = False
-    eval_env = build_env(eval_env_class, eval_env_args, args.gpu_id)
+    eval_env_args2 = eval_env_args.copy()
+    eval_env_args2['train'] = False
+    eval_env = build_env(eval_env_class, eval_env_args2, args.gpu_id)
     evaluator = Evaluator(cwd=args.cwd, env=eval_env, args=args, if_tensorboard=False)
 
     '''train loop'''

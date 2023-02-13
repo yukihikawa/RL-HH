@@ -66,7 +66,7 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward3(newTime)
+        reward = self.reward3A(newTime)
         #print(" newTime: ", newTime)
         # 解的接受
         self.accept(newTime, newSolution, action_c)
@@ -87,6 +87,7 @@ class hh_env(gym.Env):
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution, action):
+        #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
         if self.prevTime > newTime:
             self.improveCount[action] += 1
             self.solution = newSolution
@@ -107,9 +108,9 @@ class hh_env(gym.Env):
             temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
             #
             if p < temp:
-                print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
-                print('ori prevTime: ', self.prevTime, 'newTime: ', newTime, 'llh called: ', action)
+                # print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                # print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
+                # print('ori prevTime: ', self.prevTime, 'newTime: ', newTime, 'llh called: ', action)
                 self.solution = newSolution
                 self.prevTime = newTime
                 self.NOT_ACCEPTED = 1
@@ -125,6 +126,27 @@ class hh_env(gym.Env):
             self.NOT_ACCEPTED += 1
             self.NOT_IMPROVED += 1
 
+    def reward3A(self, newTime):
+        if self.prevTime > newTime:
+            reward =  2 + 1 / newTime
+            self.rewardImp += reward
+            # print("imp ", self.rewardImp)
+        else:
+            if self.prevTime == newTime:
+                reward = -0.03 + 1 / self.bestTime
+                self.rewardSta += reward
+            else:
+                # reward = self.NOT_IMPROVED * 10 / self.ITER
+                # reward = 2 * math.exp(-(35 / self.NOT_IMPROVED)) - 1
+                reward = -0.02 + 1 / self.bestTime
+                # if self.NOT_IMPROVED <= 8:
+                #     reward = 0
+                # else:
+                #     reward = 0.005 * self.NOT_IMPROVED
+                self.rewardMut += reward
+                # reward = -1
+                # print("mut reward: ", reward)
+        return reward
     def reward3(self, newTime):
         if self.prevTime > newTime:
             reward =  self.TERMINATION_TIME / (newTime - self.TERMINATION_TIME + 1)
