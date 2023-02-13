@@ -10,17 +10,20 @@ from src.LLH.LLHUtils import timeTaken
 from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
+from src.LLH.LLHSet4 import LLHSet4
 
-PROBLEM = 'MK05'
+PROBLEM = 'MK02'
 GEN_NUM =5000
 TEST_ITER = 10
-LLH_SET = 1
+LLH_SET = 4
 
-def runForTest(problem, genNum, LLH):
+def runForTest(problem, genNum, LLH_SET):
     t0 = time.time()
     parameters = parse(problem)
     best_solution = initializeResult(parameters)
     best_time = timeTaken(best_solution, parameters)
+    holder = LLHolder(LLH_SET, best_solution)
+    LLH = holder.set.llh
     llh_called = [0 for _ in range(len(LLH))]
     for gen in range(genNum):
         idx = random.randint(0, len(LLH) - 1)
@@ -41,11 +44,11 @@ def runForTest(problem, genNum, LLH):
 
 def test(TEST_ITER, PROBLEM, genNum, llh_set):
     problem_path = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-    LLH = LLHolder(LLH_SET)
+
     result = {}
     timeUsed = {}
     for i in range(TEST_ITER):
-        bt, tt = runForTest(problem_path, genNum, LLH)
+        bt, tt = runForTest(problem_path, genNum, llh_set)
         result[i] = bt
         timeUsed[i] = tt
         print(result[i], timeUsed[i])

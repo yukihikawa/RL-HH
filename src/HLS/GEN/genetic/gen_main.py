@@ -17,7 +17,8 @@ def run(problem):
     parameters = parse(problem)
     best_solution = initializeResult(parameters)
     best_time = timeTaken(best_solution, parameters)
-    LLH = LLHolder(config.LLH_SET)
+    holder = LLHolder(config.LLH_SET)
+    LLH = holder.set.llh
     #初始化种群
     population = gen_ops.initPopulation(config.POP_SIZE, config.CHROM_LENGTH, len(LLH))
     #开始循环

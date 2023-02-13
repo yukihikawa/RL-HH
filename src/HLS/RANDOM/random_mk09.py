@@ -11,7 +11,7 @@ from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
 
-PROBLEM = 'MK04'
+PROBLEM = 'MK09'
 GEN_NUM =5000
 TEST_ITER = 10
 LLH_SET = 1
@@ -41,7 +41,7 @@ def runForTest(problem, genNum, LLH):
 
 def test(TEST_ITER, PROBLEM, genNum, llh_set):
     problem_path = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-    LLH = LLHolder(LLH_SET)
+    LLH = LLHolder(LLH_SET).set.llh
     result = {}
     timeUsed = {}
     for i in range(TEST_ITER):

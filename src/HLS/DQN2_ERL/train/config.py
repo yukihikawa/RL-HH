@@ -27,7 +27,9 @@ class Config:
                         'state_dim': None,
                         'action_dim': None,
                         'if_discrete': None,
-                        'problem': None}
+                        'problem': None,
+                        'llh_set': None,
+                        'train': True}
         env_args.setdefault('num_envs', 1)  # `num_envs=1` in default in single env.
         env_args.setdefault('max_step', 12345)  # `max_step=12345` in default, which is a large enough value.
         self.env_name = env_args['env_name']  # the name of environment. Be used to set 'cwd'.
@@ -36,7 +38,9 @@ class Config:
         self.state_dim = env_args['state_dim']  # vector dimension (feature number) of state
         self.action_dim = env_args['action_dim']  # vector dimension (feature number) of action
         self.if_discrete = env_args['if_discrete']  # discrete or continuous action space
-        self.problem = env_args['problem']  # discrete or continuous action space
+        self.problem = env_args['problem']
+        self.llh_set = env_args['llh_set']
+        self.train = env_args['train']
 
         '''Arguments for reward shaping'''
         self.gamma = 0.99  # discount factor of future rewards
@@ -91,7 +95,7 @@ class Config:
 
         '''set cwd (current working directory) for saving model'''
         if self.cwd is None:  # set cwd (current working directory) for saving model
-            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{self.problem}'
+            self.cwd = f'./{self.env_name}_{self.agent_class.__name__[5:]}_{self.random_seed}_{self.problem}_{self.llh_set}'
 
         '''remove history'''
         if self.if_remove is None:

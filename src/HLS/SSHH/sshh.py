@@ -4,18 +4,20 @@ import random
 
 import numpy as np
 from src.LLH import LLHSet1 as llh
-from src.LLH.LLHUtils import LLHolder
+from src.LLH.LLHolder import LLHolder
 
 # 定义一个类,维护一个有 10 个状态的状态转移矩阵,来表示从该状态转移到其他状态的概率,初始值全部为 1
 class SequenceSelection:
-    def __init__(self):
-        self.transition_matrix = np.ones((10, 10))
-        self.heuristics = LLHolder()
+    def __init__(self, llh_set):
+        self.heuristics = llh_set
+        self.transition_matrix = np.ones((len(self.heuristics), len(self.heuristics)))
+
         self.prevState = random.randint(0, len(self.heuristics) - 1)
         self.FLAG = 1
         self.prevTime = 10000
         self.bestTime = 10000
         self.best_solution = None
+        #self.prev_solution = None
 
     # 定义一个函数,该函数接受一个状态,根据状态转移矩阵,返回一个状态
     # 从当前状态i转移到下一个状态j的概率定义为矩阵第 i 行第 j 列的值除以第 i 行所有元素之和
@@ -41,27 +43,32 @@ class SequenceSelection:
     # 更新 prevState, 返回新的 solution
     def update_solution(self, solution, parameters):
         nextState = self.next_state(self.prevState)
+        #print('llh called: ', nextState)
         new_solution = self.heuristics[nextState](solution, parameters)
         #prevTime = llh.timeTaken(solution, parameters)
         newTime = llh.timeTaken(new_solution, parameters)
-        print('newTime: ', newTime, 'prevTime: ', self.prevTime)
+
         self.prevState = nextState
         if newTime < self.prevTime:
+
             self.update_transition_matrix(self.prevState, nextState)
             self.prevTime = newTime
+            #self.prev_solution = new_solution
             # self.prevState = nextState
             self.FLAG = 1
             if self.bestTime > newTime:
+                print('newTime: ', newTime, 'prevTime: ', self.prevTime, 'beat time', self.bestTime)
                 self.bestTime = newTime
                 self.best_solution = new_solution
 
             return new_solution
         else:
             p = random.random()
-            temp = np.exp(-(newTime - self.prevTime + 1) / (self.FLAG * 0.01))
-            print('p: ', p, 'temp: ', temp)
-            if (p < temp) & (newTime > self.prevTime):
-                print('accepted!')
+            temp = np.exp(-(newTime - self.prevTime) / (self.FLAG * 0.01))
+            #print('p: ', p, 'temp: ', temp)
+            #if (p < temp) & (newTime > self.prevTime):
+            if p < temp:
+                #print('accepted!')
                 self.prevTime = newTime
                 self.FLAG = 1
                 # self.prevState = nextState

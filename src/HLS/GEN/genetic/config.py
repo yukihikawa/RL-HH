@@ -13,5 +13,5 @@ P_MUT = 0.3
 
 CROSS_TIMES = 5
 
-LLH_SET = 1
+LLH_SET = 2
 

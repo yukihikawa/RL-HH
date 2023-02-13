@@ -1,39 +1,24 @@
-from src.LLH import LLHSet1, LLHSet2
 
-def LLHolder(llhSet):
-    if llhSet == 1:
-        return llhset1()
-    elif llhSet == 2:
-        return llhset2()
+from src.LLH.LLHSet1 import LLHSet1
+from src.LLH.LLHSet2 import LLHSet2
+from src.LLH.LLHSet3 import LLHSet3
+from src.LLH.LLHSet4 import LLHSet4
 
-def llhset1():
-    llhList = []
-    llhList.append(LLHSet1.heuristic1)
-    llhList.append(LLHSet1.heuristic2)
-    llhList.append(LLHSet1.heuristic3)
-    llhList.append(LLHSet1.heuristic4)
-    llhList.append(LLHSet1.heuristic5)
-    llhList.append(LLHSet1.heuristic6)
-    llhList.append(LLHSet1.heuristic7)
-    llhList.append(LLHSet1.heuristic8)
-    llhList.append(LLHSet1.heuristic9)
-    llhList.append(LLHSet1.heuristic10)
-    # llhList.append(heuristic11)
 
-    return llhList
+class LLHolder:
+    def __init__(self, llh_set):
+        if llh_set == 1:
+            self.set = LLHSet1()
+        elif llh_set == 2:
+            self.set = LLHSet2()
+        elif llh_set == 3:
+            self.set = LLHSet3()
+        elif llh_set == 4:
+            self.set = LLHSet4()
 
-def llhset2():
-    llhList = []
-    llhList.append(LLHSet2.heuristic4)
-    llhList.append(LLHSet2.heuristic6)
-    llhList.append(LLHSet2.heuristic7)
-    llhList.append(LLHSet2.heuristic1)
-    llhList.append(LLHSet2.heuristic5)
-    llhList.append(LLHSet2.heuristic2)
-    llhList.append(LLHSet2.heuristicA)
-    llhList.append(LLHSet2.heuristicB)
 
-    # llhList.append(heuristic11)
 
-    return llhList
+
+
+
 

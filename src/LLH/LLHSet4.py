@@ -1,30 +1,59 @@
 import random
+import numpy as np
 
 from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx
+class LLHSet4:
 
-class LLHSet3:
     def __init__(self):
+        #self.init_solution = init_solution
+        # self.os_tabu = [0 for i in range(0, len(init_solution[0]))]
+        # self.ms_tabu = [0 for i in range(0, len(init_solution[1]))]
+        self.ms_tabu = None
+        self.os_tabu = None
         self.llh = []
-        #添加所有函数到 llh
+        self.llh.append(self.heuristic1)
+        self.llh.append(self.heuristic2A)
+        self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic4)
+        self.llh.append(self.heuristic5)
         self.llh.append(self.heuristic6)
         self.llh.append(self.heuristic7)
-        self.llh.append(self.heuristic1)
-        self.llh.append(self.heuristic5)
-        self.llh.append(self.heuristic2)
-        self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic8)
         self.llh.append(self.heuristic9)
         self.llh.append(self.heuristic10)
         self.llh.append(self.heuristic11)
 
+    def get_randon_zero_index(self, tabu_list):
+        zero_indices = np.where(np.array(tabu_list) == 0)[0]
+        return random.choice(zero_indices)
+
+
+    # 破禁条件
+    def check_tabu(self, solution):
+        if self.os_tabu is None:
+            self.os_tabu = [0 for i in range(0, len(solution[0]))]
+        # 如果 os_tabu 各元素之和等于列表长度,将其全部赋值为 0
+        if self.ms_tabu is None:
+            self.ms_tabu = [0 for i in range(0, len(solution[1]))]
+        if sum(self.os_tabu) == len(self.os_tabu):
+            self.os_tabu = [0 for i in range(0, len(self.os_tabu))]
+        # 如果 ms_tabu 各元素之和等于列表长度,将其全部赋值为 0
+        if sum(self.ms_tabu) == len(self.ms_tabu):
+            self.ms_tabu = [0 for i in range(0, len(self.ms_tabu))]
+
+
     ##############优化操作#################
-    # 1. 对 os 简化领域搜索 已测
+    # 1. 对 os 局部搜索
     def heuristic1(self, os_ms, parameters):
+
+        self.check_tabu(os_ms)
         (os, ms) = os_ms
         tos = os.copy()
         # print(tos)
-        idx = random.randint(0, len(tos) - 1)
+        # idx = random.randint(0, len(tos) - 1)
+        idx = self.get_randon_zero_index(self.os_tabu)
+        self.os_tabu[idx] = 1
+
         bestTime = timeTaken((tos, ms), parameters)
         # print('selected position: ', idx)
         for i in range(0, len(tos)):
@@ -37,8 +66,39 @@ class LLHSet3:
                 tos = newOs
         return (tos, ms)
 
-    # 2. 机器码简化领域搜索 已测
+    # 2. 机器码局部搜索
     def heuristic2(self, os_ms, parameters):
+
+        self.check_tabu(os_ms)
+        (os, ms) = os_ms
+        bestTime = timeTaken((os, ms), parameters)
+        idx = self.get_randon_zero_index(self.ms_tabu)
+        self.ms_tabu[idx] = 1
+        # newMs = changeMsRandom(idx, ms, parameters)
+        # for i in range(0, len(tms)):
+        #     newMs = changeMsRandom(i, ms, parameters)
+        #     if bestTime > timeTaken((os, newMs), parameters):
+        #         return (os, newMs)
+        # 获取作业集合
+        jobs = parameters['jobs']
+        mcLength = 0  # 工具人
+        jobIdx = -1  # 所属工作号
+        for job in jobs:
+            jobIdx += 1
+            if mcLength + len(job) >= idx + 1:
+                break
+            else:
+                mcLength += len(job)
+        opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
+        #开始搜索机器集合
+        for i in range(0, len(jobs[jobIdx][opIdx])):
+            newMs = ms.copy()
+            newMs[idx] = i
+            if bestTime > timeTaken((os, newMs), parameters):
+                return (os, newMs)
+        return (os, ms)
+
+    def heuristic2A(self, os_ms, parameters):
         (os, ms) = os_ms
         tms = ms.copy()
         bestTime = timeTaken((os, tms), parameters)
@@ -48,13 +108,18 @@ class LLHSet3:
                 return (os, newMs)
         return (os, tms)
 
-    # 3. 并行简化领域搜索
+
+
+    # 3. 并行局部搜索
     def heuristic3(self, os_ms, parameters):
+        self.check_tabu(os_ms)
         (os, ms) = os_ms
         tos = os.copy()
         tms = ms.copy()
         # print(tos)
-        idx = random.randint(0, len(tos) - 1)
+        # idx = random.randint(0, len(tos) - 1)
+        idx = self.get_randon_zero_index(self.os_tabu)
+        self.os_tabu[idx] = 1
 
         bestTime = timeTaken((tos, ms), parameters)
         # print('selected position: ', idx)
@@ -202,4 +267,3 @@ class LLHSet3:
             newMs = changeMsRandom(i, newMs, parameters)
 
         return (newOs, newMs)
-

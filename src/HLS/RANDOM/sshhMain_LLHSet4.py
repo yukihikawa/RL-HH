@@ -5,8 +5,10 @@ import random
 
 import sys
 import time
+from src.LLH.LLHSet4 import LLHSet4
 
 from src.HLS.SSHH import sshh
+from src.LLH.LLHolder import LLHolder
 from src.utils import parser, gantt
 from src.utils import encoding, decoding
 from src.LLH import LLHUtils as llhUtils
@@ -17,22 +19,23 @@ from src.utils import config
 # Parameters Setting
 strs = '../../Brandimarte_Data/Mk06.fjs'
 para = parser.parse(strs) # 导入数据
-llh_set = 3
-ss = sshh.SequenceSelection(llh_set)
+solution = (encoding.generateOS(para), encoding.generateMS(para))
+holder =LLHolder(4, solution)
+ss = sshh.SequenceSelection(holder.set.llh)
 
 
 t0 = time.time()
 # Initialize the Population
-ss.best_solution = solution = (encoding.generateOS(para), encoding.generateMS(para))
+ss.best_solution = solution
 
 ss.prevTime = oriTime = llhUtils.timeTaken(ss.best_solution, para)
 print('Ori time:', oriTime)
 
 for epoch in range(0, 5000):
-    #print('epoch:', epoch)
+    print('epoch:', epoch, 'os_tabu:', sum(holder.set.os_tabu), 'ms_tabu', sum(holder.set.ms_tabu))
     solution = ss.update_solution(solution, para)
     newTime = llhUtils.timeTaken(solution, para)
-    #print('time:', newTime)
+    print('time:', newTime)
 
 
 # Termination Criteria Satisfied ?

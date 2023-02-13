@@ -17,16 +17,19 @@ IDEAL_TIME = {'MK01': (36, 42), 'MK02': (27, 32), 'MK03': (204, 211), 'MK04': (6
 BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': 197}
 
 class hh_env(gym.Env):
-    def __init__(self, problem = '', problem_path = '', llh_set = 1, solve_iter = 5000):
+    def __init__(self, problem = '', problem_path = '', llh_set = 1, solve_iter = 5000, train = True):
         # self.factory = parser.parse(PROBLEM_STR)
         # self.solution = encoding.initializeResult(self.factory)
         # self.iter = 0
         # self.prevTime = 0
+        self.train = train
         self.problem = problem
         self.problem_path = problem_path
         self.llh_set = llh_set
         self.solve_iter = solve_iter
-        self.heuristics = LLHolder(self.llh_set)
+        self.holder = LLHolder(self.llh_set)
+        self.heuristics = self.holder.set.llh
+        #print('heuristics: ', self.heuristics)
         # 定义动作空间
         self.action_space = spaces.Discrete(len(self.heuristics))
         # 定义状态空间, 有 0-9 共 10 个整数状态
@@ -48,9 +51,12 @@ class hh_env(gym.Env):
         # self.if_discrete = True  # discrete action or continuous action
 
     def step(self, action):
-
+        #print('llh_set: ', self.llh_set)
+        #print(len(self.heuristics))
         #action_c = np.argmax(action)
         action_c = action
+        #print(action_c)
+        #print(self.callCount)
         self.callCount[action_c] += 1
         self.ITER += 1
         newSolution = self.heuristics[action_c](self.solution, self.parameters)
@@ -66,8 +72,8 @@ class hh_env(gym.Env):
         self.accept(newTime, newSolution, action_c)
 
 
-        if action_c in [3, 5, 6]:
-            # if action in [0, 1, 2]:
+        #if action_c in [3, 5, 6]:
+        if action_c in [0, 1, 2]:
             ck = 20
         else:
             ck = 40
@@ -88,24 +94,24 @@ class hh_env(gym.Env):
             if (self.bestTime > newTime):
                 self.best_solution = newSolution
                 self.bestTime = newTime
-                print("iter: ", self.ITER, "new bestTime: ", self.bestTime)
+                print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
             self.NOT_ACCEPTED = 1
             self.NOT_IMPROVED = 1
         elif self.prevTime < newTime:
             self.NOT_IMPROVED += 1
             #print(' ')
-            #print('ori prevTime: ', self.prevTime, 'newTime: ', newTime)
+
             # 解的接受
             p = random.random()
             #模拟退火
             temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
-            #print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
+            #
             if p < temp:
-                #print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
+                print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
+                print('ori prevTime: ', self.prevTime, 'newTime: ', newTime, 'llh called: ', action)
                 self.solution = newSolution
                 self.prevTime = newTime
-                #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
                 self.NOT_ACCEPTED = 1
                 self.NOT_IMPROVED += 1
             else:
@@ -157,6 +163,9 @@ class hh_env(gym.Env):
         else:
             return False
     def reset(self, **kwargs):
+        self.heuristics = LLHolder(self.llh_set).set.llh
+        # print('llh_set: ', self.llh_set)
+        # print("heuristics: ", self.heuristics)
         self.TERMINATION_TIME = BEST_TIME[self.problem]
         self.parameters = parser.parse(self.problem_path)
         self.best_solution = self.solution = encoding.initializeResult(self.parameters)
@@ -167,7 +176,7 @@ class hh_env(gym.Env):
         self.rewardSta = 0
         self.ITER = 1
         self.prevTime = self.bestTime = llh.timeTaken(self.solution, self.parameters)
-        self.prevState = random.randint(0, 10)
+        self.prevState = random.randint(0, len(self.heuristics))
         self.callCount = [0 for i in range(len(self.heuristics))]
         self.improveCount = [0 for i in range(len(self.heuristics))]
         # 返回一个一维的整型张量,随机取值,取值范围是[0,10)
