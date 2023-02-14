@@ -7,7 +7,7 @@ from gym import spaces
 
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
-from src.HLS.DQN2_ERL.train import config
+from src.HLS.DQN2_ERL_MORE_STATE.train import config
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 
@@ -38,8 +38,8 @@ class hh_env(gym.Env):
         # 定义状态空间
         # self.observation_space = spaces.Box(low=-float('inf'), high=float('inf'), shape=(1,))
         # self.observation_space = spaces.Tuple((spaces.Discrete(len(self.heuristics)), spaces.Discrete(5000), spaces.Box(-float('inf'), float('inf'), shape=(1,))))
-        low = np.array([0.0, 0, -float('inf')])
-        high = np.array([len(self.heuristics), self.solve_iter, float('inf')])
+        low = np.array([0.0, 0, -float('inf'), 1.0])
+        high = np.array([len(self.heuristics), self.solve_iter, float('inf'), float('inf')])
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         # self.observation_space = spaces.Discrete(10)
         # self.state = None
@@ -79,7 +79,8 @@ class hh_env(gym.Env):
         else:
             ck = 40
         delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
-        s_ = np.array([action_c, self.NOT_IMPROVED, delta])
+        prevImprove = self.oriTime / self.prevTime
+        s_ = np.array([action_c, self.NOT_IMPROVED, delta, prevImprove])
 
         if termination:
             #reward = self.endReward4A()
@@ -191,7 +192,7 @@ class hh_env(gym.Env):
         self.callCount = [0 for i in range(len(self.heuristics))]
         self.improveCount = [0 for i in range(len(self.heuristics))]
         # 返回一个一维的整型张量,随机取值,取值范围是[0,10)
-        return np.array([self.prevState, self.NOT_IMPROVED, 0])
+        return np.array([self.prevState, self.NOT_IMPROVED, 0, 1])
 
     def render(self, mode='human'):
         print('LLH called: ')

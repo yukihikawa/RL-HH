@@ -2,7 +2,7 @@ import os
 import gym
 import torch
 import matplotlib.pyplot as plt
-from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
+from src.HLS.DQN2_ERL_MORE_STATE.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN

@@ -9,7 +9,8 @@ from src.LLH.LLHolder import LLHolder
 # 定义一个类,维护一个有 10 个状态的状态转移矩阵,来表示从该状态转移到其他状态的概率,初始值全部为 1
 class SequenceSelection:
     def __init__(self, llh_set):
-        self.heuristics = llh_set
+        self.holder = LLHolder(llh_set)
+        self.heuristics = self.holder.set.llh
         self.transition_matrix = np.ones((len(self.heuristics), len(self.heuristics)))
 
         self.prevState = random.randint(0, len(self.heuristics) - 1)

@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import src.HLS.GEN.genetic.gen_main as gen_main
@@ -12,7 +13,8 @@ from src.utils.parser import parse
 
 def test(TEST_ITER, PROBLEM, genNum, chromLength, popSize, crossTimes, pMut, llh_set):
     problem_path = os.path.join(os.getcwd(), "../../../Brandimarte_Data/" + PROBLEM + ".fjs")
-    LLH = LLHolder(LLH_SET)
+    holder = LLHolder(llh_set)
+    LLH = holder.set.llh
     result = {}
     for i in range(TEST_ITER):
         result[i] = runForTestPara(problem_path, genNum, chromLength, popSize, crossTimes, pMut, LLH)
@@ -24,6 +26,7 @@ def test(TEST_ITER, PROBLEM, genNum, chromLength, popSize, crossTimes, pMut, llh
 
 
 def runForTest(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
+    t0 = time.time()
     parameters = parse(problem)
     best_solution = initializeResult(parameters)
     best_time = timeTaken(best_solution, parameters)
@@ -45,6 +48,8 @@ def runForTest(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
         childChrom1 = gen_ops.bestSelection(childPop, fitness)
         childChrom2 = gen_ops.rouletteSelection(childPop, fitness)
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
+    t1 = time.time()
+    print('time taken: ', t1 - t0)
     return best_time
 
 def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):

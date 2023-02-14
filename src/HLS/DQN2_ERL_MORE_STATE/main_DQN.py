@@ -22,7 +22,7 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'env_name': 'hh_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
-        'state_dim': 3,
+        'state_dim': 4,
         'action_dim': len(LLHolder(LLH_SET).set.llh),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
         'problem': PROBLEM,

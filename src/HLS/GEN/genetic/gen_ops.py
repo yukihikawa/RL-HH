@@ -162,6 +162,25 @@ def crossover(chrom1, chrom2, cross_times):
 #对传入的单个染色体进行变异
 def singleMutate(chrom, pm, len_llh):
     new_chrom = chrom.copy()
+    # 0-1的随机数
+    p = random.random()
+    if p < pm:
+        # pos = random.randint(0, len(new_chrom) - 1)
+        # new_chrom[pos] = random.randint(0, len_llh - 1)
+        ida = idb = random.randint(0, len(new_chrom) - 2)
+        while ida == idb:
+            idb = random.randint(0, len(new_chrom) - 1)
+
+        if ida > idb:
+            ida, idb = idb, ida
+
+        rev = new_chrom[ida:idb + 1]
+        #rev.reverse()
+        random.shuffle(rev)
+        newOs = new_chrom[:ida] + rev + new_chrom[idb + 1:]
+    return new_chrom
+def singleMutateOri(chrom, pm, len_llh):
+    new_chrom = chrom.copy()
     for i in range(len(new_chrom)):
         if random.random() < pm:
             new_chrom[i] = random.randint(0, len_llh - 1)
