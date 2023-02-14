@@ -45,6 +45,8 @@ def build_mlp(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn
     """
     if activation is None:
         activation = nn.ReLU
+        # 激活函数
+        #activation = nn.Hardswish
     net_list = []
     for i in range(len(dims) - 1):
         net_list.extend([nn.Linear(dims[i], dims[i + 1]), activation()])
