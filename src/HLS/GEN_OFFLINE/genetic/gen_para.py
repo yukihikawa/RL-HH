@@ -1,5 +1,4 @@
 import random
-import time
 from concurrent.futures import ThreadPoolExecutor
 
 from src.LLH.LLHolder import LLHolder
@@ -8,20 +7,20 @@ from src.LLH.LLHUtils import timeTaken
 from src.utils.parser import parse
 import src.HLS.GEN.genetic.gen_ops as gen_ops
 import src.HLS.GEN.genetic.config as config
-
+from src.HLS.GEN.genetic.applyPopParallel import apply
 
 # 运行遗传算法
 def run(problem):
-    t0 = time.time()
     print(config.PROBLEM)
     print('gen:', config.GEN_NUM, 'chrom: ', config.CHROM_LENGTH, 'llh: ', config.LLH_SET)
     parameters = parse(problem)
     best_solution = initializeResult(parameters)
     best_time = timeTaken(best_solution, parameters)
-    holder = LLHolder(config.LLH_SET)
-    LLH = holder.set.llh
+    LLH = LLHolder(config.LLH_SET)
     #初始化种群
     population = gen_ops.initPopulation(config.POP_SIZE, config.CHROM_LENGTH, len(LLH))
+    pool = ThreadPoolExecutor(max_workers=config.CROSS_TIMES * 2)
+    applier = apply(best_solution, parameters, pool, LLH)
     #开始循环
     for gen in range(config.GEN_NUM):
         print('generation: ', gen, 'best time: ', best_time)
@@ -33,27 +32,21 @@ def run(problem):
         # 子代种群变异
         childPop = gen_ops.mutate(childPop, config.P_MUT, len(LLH))
         # 将子代种群应用到 best_solution, 获取所有新解
-        new_solutions, new_times = gen_ops.applyPopulationParallel(childPop, best_solution, parameters, LLH)
-        # 计算子代适应度
-        fitness = gen_ops.fitness(new_times)
+        applier.solution = best_solution
+        new_solutions = applier.applyPopulation(childPop)
+        new_times = []
+        fitness = []
+        for solution in new_solutions:
+            newTime = timeTaken(solution, parameters)
+            new_times.append(newTime)
+            fitness.append(1 / newTime)
         # 获取 new_times中最小值的索引
         idx = new_times.index(min(new_times))
         #if new_times[idx] < best_time:
         best_time = new_times[idx]
         best_solution = new_solutions[idx]
         print('new best time: ', best_time)
-        # for i in range(len(new_solutions)):
-        #     new_time = new_times[i]
-        #     if new_time < best_time:
-        #         best_time = new_time
-        #         best_solution = new_solutions[i]
-        #         print('new best time: ', best_time)
-            # elif new_time == best_time:
-            #     p = random.random()
-            #     if p < 0.6 - 0.005 * gen:
-            #         best_time = new_time
-            #         best_solution = new_solutions[i]
-            #         print('new best time: ', best_time)
+
 
         #子代选择两个个体
         childChrom1 = gen_ops.bestSelection(childPop, fitness)
@@ -61,8 +54,6 @@ def run(problem):
         #替换所选的父代个体
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
     print('final best time: ', best_time)
-    t1 = time.time()
-    print('time used: ', t1 - t0)
     return best_time
 
 

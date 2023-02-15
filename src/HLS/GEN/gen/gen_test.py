@@ -53,6 +53,7 @@ def runForTest(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
     return best_time
 
 def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
+    t0 = time.time()
     parameters = parse(problem)
     best_solution = initializeResult(parameters)
     best_time = timeTaken(best_solution, parameters)
@@ -81,6 +82,8 @@ def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH)
         childChrom1 = gen_ops.bestSelection(childPop, fitness)
         childChrom2 = gen_ops.rouletteSelection(childPop, fitness)
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
+    t1 = time.time()
+    print('time taken: ', t1 - t0)
     return best_time
 
 
