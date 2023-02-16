@@ -44,16 +44,16 @@ class hh_env(gym.Env):
         newTime = llh.timeTaken(newSolution, self.parameters)
         termination = self.termination()
         # 奖励
-        reward = self.reward(newTime)
+        reward = self.reward(newTime, termination)
         # 状态和解的接受
         delta = self.prevTime - newTime#局部最优判定
         self.accept(newTime, newSolution, action)
         s_ = np.array([action, self.NOT_IMPROVED, delta])
+        info = {}
         if termination:
-
             self.render()
-            return s_, reward, termination, {'bestTime': self.bestTime}
-        return s_, reward, termination, {}
+            info = {'bestTime': self.bestTime}
+        return s_, reward, termination, info
 
 
     def accept(self, newTime, newSolution, action):
@@ -69,23 +69,31 @@ class hh_env(gym.Env):
 
     def reward(self, newTime, termination):
         if newTime < self.bestTime: #主线任务奖励
-            reward = 100
+            reward = 100 * (self.bestTime - newTime) * (self.oriTime / newTime)
+            self.rewardImpP += reward
         elif newTime >= self.bestTime & newTime < self.prevTime:
-            reward = 10
+            reward = -1
+            self.rewardImpL += reward
         elif newTime == self.prevTime:
             reward = -5
+            self.rewardSta += reward
         else:
             if random.random() < math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01)):
                 reward = -1
             else:
                 reward = -10
-        if termination & self.bestTime <= self.TERMINATION_TIME:
-            reward += 10000
+            self.rewardMut += reward
+        if termination:
+            if self.bestTime <= self.TERMINATION_TIME:
+                reward += 2000
+                self.rewardEnd += reward
         return reward
 
     def termination(self):
         #if self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1]) or self.ITER > 5000:
-        if self.ITER > self.solve_iter | self.bestTime <= self.TERMINATION_TIME:
+        if self.ITER > self.solve_iter:
+            return True
+        elif self.bestTime <= self.TERMINATION_TIME:
             return True
         else:
             return False

@@ -9,9 +9,9 @@ from env import hh_env
 gym.logger.set_level(40)  # Block warning
 
 
-PROBLEM = 'MK06'
+PROBLEM = 'MK02'
 LLH_SET = 4
-SOLVE_ITER = 5000
+SOLVE_ITER = 2000
 
 
 def train_dqn_for_hyper_heuristic(gpu_id=0):
