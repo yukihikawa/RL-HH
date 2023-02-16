@@ -9,9 +9,9 @@ from env import hh_env
 gym.logger.set_level(40)  # Block warning
 
 
-PROBLEM = 'MK09'
-LLH_SET = 1
-SOLVE_ITER = 5000
+PROBLEM = 'MK04'
+LLH_SET = 4
+SOLVE_ITER = 500
 
 
 def train_dqn_for_hyper_heuristic(gpu_id=0):
@@ -34,7 +34,7 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
     #get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
     args = Config(agent_class, env_class, env_args)  # see `config.py Arguments()` for hyperparameter explanation
-    args.break_step = int(1e5)  # break training if 'total_step > break_step'
+    args.break_step = int(2e5)  # break training if 'total_step > break_step'
     args.net_dims = (16, 16, 16)  # the middle layer dimension of MultiLayer Perceptron
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards

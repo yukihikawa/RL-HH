@@ -2,7 +2,7 @@ from gen_test import test
 
 PROBLEM = 'MK05'
 POP_SIZE = 50
-CHROM_LENGTH = 110
+CHROM_LENGTH = 150
 GEN_NUM = 10
 P_MUT = 0.3
 CROSS_TIMES = 5

@@ -2,8 +2,8 @@ from gen_test import test
 
 PROBLEM = 'MK01'
 POP_SIZE = 50
-CHROM_LENGTH = 50
-GEN_NUM = 30
+CHROM_LENGTH = 110
+GEN_NUM = 10
 P_MUT = 0.3
 CROSS_TIMES = 5
 TEST_ITER = 10
