@@ -13,7 +13,7 @@ from src.utils import parser
 
 
 #10个问题的最优解区间
-IDEAL_TIME = {'MK01': (36, 40), 'MK02': (27, 30), 'MK03': (204, 2204), 'MK04': (60, 67), 'MK05': (168, 178), 'MK06': (60, 80), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 330), 'MK10': (165, 280)}
+IDEAL_TIME = {'MK01': (36, 40), 'MK02': (27, 30), 'MK03': (204, 2204), 'MK04': (60, 65), 'MK05': (168, 178), 'MK06': (60, 80), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 330), 'MK10': (165, 280)}
 BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': 197}
 
 class hh_env(gym.Env):
@@ -47,7 +47,7 @@ class hh_env(gym.Env):
         reward = self.reward(newTime, termination)
         # 状态和解的接受
         delta = self.prevTime - newTime#局部最优判定
-        self.accept(newTime, newSolution, action)
+        self.acceptA(newTime, newSolution, action)
         s_ = np.array([action, self.NOT_IMPROVED, delta])
         info = {}
         if termination:
@@ -64,8 +64,59 @@ class hh_env(gym.Env):
             self.bestTime = newTime
         else:
             self.NOT_IMPROVED += 1
-        self.prevTime = newTime
-        self.prevSolution = newSolution
+
+        if newTime <= self.prevTime:
+            self.NOT_ACCEPTED = 1
+            self.prevTime = newTime
+            self.prevSolution = newSolution
+        else:
+            print('self.NOT_ACCEPTED: ', self.NOT_ACCEPTED)
+            if random.random() < math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01)):
+                self.prevTime = newTime
+                self.prevSolution = newSolution
+                self.NOT_ACCEPTED = 1
+            else:
+                self.NOT_ACCEPTED += 1
+
+    def acceptA(self, newTime, newSolution, action):
+        #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
+        if self.prevTime > newTime:
+            self.improveCount[action] += 1
+            self.solution = newSolution
+            self.prevTime = newTime
+            if (self.bestTime > newTime):
+                self.best_solution = newSolution
+                self.bestTime = newTime
+                #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
+            self.NOT_ACCEPTED = 1
+            self.NOT_IMPROVED = 1
+        elif self.prevTime < newTime:
+            self.NOT_IMPROVED += 1
+            #print(' ')
+
+            # 解的接受
+            p = random.random()
+            #模拟退火
+            temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
+            #
+            if p < temp:
+                # print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                # print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
+                # print('ori prevTime: ', self.prevTime, 'newTime: ', newTime, 'llh called: ', action)
+                self.solution = newSolution
+                self.prevTime = newTime
+                self.NOT_ACCEPTED = 1
+                self.NOT_IMPROVED += 1
+            else:
+                #print('declined!!!!!!!!!')
+                self.NOT_ACCEPTED += 1
+                self.NOT_IMPROVED += 1
+        else:
+            self.solution = newSolution
+            self.prevTime = newTime
+            #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
+            self.NOT_ACCEPTED += 1
+            self.NOT_IMPROVED += 1
 
     def reward(self, newTime, termination):
         if newTime < self.bestTime: #主线任务奖励
