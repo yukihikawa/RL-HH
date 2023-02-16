@@ -3,6 +3,7 @@ from src.LLH.LLHSet1 import LLHSet1
 from src.LLH.LLHSet2 import LLHSet2
 from src.LLH.LLHSet3 import LLHSet3
 from src.LLH.LLHSet4 import LLHSet4
+from src.LLH.LLHSet5 import LLHSet5
 
 
 class LLHolder:
@@ -15,6 +16,8 @@ class LLHolder:
             self.set = LLHSet3()
         elif llh_set == 4:
             self.set = LLHSet4()
+        elif llh_set == 5:
+            self.set = LLHSet5()
 
 
 

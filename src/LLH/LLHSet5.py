@@ -1,67 +1,21 @@
 import random
 from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx
 
-class LLHSet1:
+class LLHSet5:
     def __init__(self):
         self.llh = []
         #添加所有函数到 llh
-        self.llh.append(self.heuristic4)
-        self.llh.append(self.heuristic6)
-        self.llh.append(self.heuristic7)
         self.llh.append(self.heuristic1)
-        self.llh.append(self.heuristic5)
         self.llh.append(self.heuristic2)
         self.llh.append(self.heuristic3)
-        self.llh.append(self.heuristic8)
-        self.llh.append(self.heuristic9)
-        self.llh.append(self.heuristic10)
+        self.llh.append(self.heuristic4)
+        self.llh.append(self.heuristic5)
+        self.llh.append(self.heuristic6)
 
     # =====================启发式操作++++++++++++++++++
-    # 1. 随机交换两个工序码, 返回新的工序码 已测
-    def heuristic1(self, os_ms, parameters):
-        # print('1')
-        # 随机选择两个不同机器码
-        (os, ms) = os_ms
-        ida = idb = random.randint(0, len(os) - 1)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-
-        newOs = os.copy()
-        newOs[ida], newOs[idb] = newOs[idb], newOs[ida]
-        return (newOs, ms)
-
-    # 2. 随机反转工序码子序列 已测
-    def heuristic2(self, os_ms, parameters):
-        (os, ms) = os_ms
-        ida = idb = random.randint(0, len(os) - 2)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-
-        if ida > idb:
-            ida, idb = idb, ida
-
-        rev = os[ida:idb + 1]
-        rev.reverse()
-        newOs = os[:ida] + rev + os[idb + 1:]
-
-        return (newOs, ms)
-
-    # 3. 随机前移工序码子序列 已测
-    def heuristic3(self, os_ms, parameters):
-        (os, ms) = os_ms
-        ida = idb = random.randint(0, len(os) - 2)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-
-        if ida > idb:
-            ida, idb = idb, ida
-
-        newOs = os[ida:idb + 1] + os[:ida] + os[idb + 1:]
-
-        return (newOs, ms)
 
     # 4. 对 os 简化领域搜索 已测
-    def heuristic4(self, os_ms, parameters):
+    def heuristic1(self, os_ms, parameters):
         (os, ms) = os_ms
         tos = os.copy()
         # print(tos)
@@ -78,15 +32,9 @@ class LLHSet1:
                 tos = newOs
         return (tos, ms)
 
-    # 5. 随机改变单个机器码 已测
-    def heuristic5(self, os_ms, parameters):
-        (os, ms) = os_ms
-        machineIdx = random.randint(0, len(ms) - 1)
-        # ('selected idx : ', machineIdx)
-        return (os, changeMsRandom(machineIdx, ms, parameters))
 
     # 6. 机器码简化领域搜索 已测
-    def heuristic6(self, os_ms, parameters):
+    def heuristic2(self, os_ms, parameters):
         (os, ms) = os_ms
         tms = ms.copy()
         bestTime = timeTaken((os, tms), parameters)
@@ -98,7 +46,7 @@ class LLHSet1:
         return (os, tms)
 
     # 7. 并行简化领域搜索
-    def heuristic7(self, os_ms, parameters):
+    def heuristic3(self, os_ms, parameters):
         (os, ms) = os_ms
         tos = os.copy()
         tms = ms.copy()
@@ -120,28 +68,9 @@ class LLHSet1:
                 tms = newMs
         return (tos, tms)
 
-    # 8. 工序码随机交换同时随机改变对应位置机器码 已测
-    def heuristic8(self, os_ms, parameters):
-        jobs = parameters['jobs']
-        (os, ms) = os_ms
-        newOs = os.copy()
-        newMs = ms.copy()
-
-        ida = idb = random.randint(0, len(os) - 1)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-
-        newOs[ida], newOs[idb] = newOs[idb], newOs[ida]  # 工序码交换完成
-        machineIda = getMachineIdx(ida, os, parameters)
-        machineIdb = getMachineIdx(idb, os, parameters)
-
-        newMs = changeMsRandom(machineIda, newMs, parameters)
-        newMs = changeMsRandom(machineIdb, newMs, parameters)
-
-        return (newOs, newMs)
-
-    # 9. 工序码随机反转子序列并同时随机改变对应位置机器码 已测
-    def heuristic9(self, os_ms, parameters):
+###############变异
+    # 5. 随机反转工序码子序列 已测
+    def heuristic4(self, os_ms, parameters):
         (os, ms) = os_ms
         ida = idb = random.randint(0, len(os) - 2)
         while ida == idb:
@@ -149,32 +78,39 @@ class LLHSet1:
 
         if ida > idb:
             ida, idb = idb, ida
-
-        # print('start: ', ida, ' end: ', idb)
 
         rev = os[ida:idb + 1]
         rev.reverse()
         newOs = os[:ida] + rev + os[idb + 1:]
-        newMs = ms.copy()
-        for i in range(ida, idb + 1):
-            # print('place: ', i)
-            newMs = changeMsRandom(i, newMs, parameters)
 
-        return (newOs, newMs)
+        return (newOs, ms)
 
-    # 10. 随机前移工序码子序列, 并改变对应位置的机器码 已测
-    def heuristic10(self, os_ms, parameters):
+    # 6. 随机抽取一段长度为tos长度一半的子序列,将其顺序随机打乱
+    def heuristic5(self, os_ms, parameters=None):
         (os, ms) = os_ms
+        tos = os.copy()
+        # 随机抽取一段tos的子序列,其长度为tos长度的一半
         ida = idb = random.randint(0, len(os) - 2)
         while ida == idb:
             idb = random.randint(0, len(os) - 1)
 
         if ida > idb:
             ida, idb = idb, ida
+        # print('start: ', start, 'end: ', end)
+        # print('tos: ', tos)
+        # print(tos[0:start])
 
-        newOs = os[ida:idb + 1] + os[:ida] + os[idb + 1:]
-        newMs = ms.copy()
-        for i in range(0, idb - ida + 1):
-            newMs = changeMsRandom(i, newMs, parameters)
+        mid = tos[ida:idb + 1]
+        # print(mid)
+        random.shuffle(mid)
+        # print(mid)
+        # print(tos[end:len(tos)])
+        newOs = os[:ida] + mid + os[idb + 1:]
+        return (newOs, ms)
 
-        return (newOs, newMs)
+    # 5. 随机改变单个机器码 已测
+    def heuristic6(self, os_ms, parameters):
+        (os, ms) = os_ms
+        machineIdx = random.randint(0, len(ms) - 1)
+        # ('selected idx : ', machineIdx)
+        return (os, changeMsRandom(machineIdx, ms, parameters))
