@@ -10,7 +10,7 @@ gym.logger.set_level(40)  # Block warning
 
 
 PROBLEM = 'MK04'
-LLH_SET = 4
+LLH_SET = 5
 SOLVE_ITER = 2000
 
 

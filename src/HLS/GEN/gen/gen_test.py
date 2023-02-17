@@ -16,12 +16,14 @@ def test(TEST_ITER, PROBLEM, genNum, chromLength, popSize, crossTimes, pMut, llh
     holder = LLHolder(llh_set)
     LLH = holder.set.llh
     result = {}
+    timeTaken = {}
     for i in range(TEST_ITER):
-        result[i] = runForTestPara(problem_path, genNum, chromLength, popSize, crossTimes, pMut, LLH)
+        result[i], timeTaken[i] = runForTestPara(problem_path, genNum, chromLength, popSize, crossTimes, pMut, LLH)
         print(result[i])
     print('genNum: ', genNum, 'chromLength: ', chromLength, 'popSize: ', popSize, 'cross times: ', crossTimes, 'pM: ', pMut, 'LLH Set: ', llh_set)
     print('result for ', PROBLEM, ':')
     print(result)
+    print(timeTaken)
     print('average time: ', sum(result.values()) / TEST_ITER)
 
 
@@ -50,7 +52,7 @@ def runForTest(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
     t1 = time.time()
     print('time taken: ', t1 - t0)
-    return best_time
+    return best_time, t1 - t0
 
 def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH):
     t0 = time.time()
@@ -84,7 +86,7 @@ def runForTestPara(problem, genNum, chromLength, popSize, crossTimes, pMut, LLH)
         population[parentIdx1], population[parentIdx2] = childChrom1, childChrom2
     t1 = time.time()
     print('time taken: ', t1 - t0)
-    return best_time
+    return best_time, t1 - t0
 
 
 

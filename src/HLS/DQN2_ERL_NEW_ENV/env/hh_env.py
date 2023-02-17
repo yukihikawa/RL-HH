@@ -93,7 +93,6 @@ class hh_env(gym.Env):
         elif self.prevTime < newTime:
             self.NOT_IMPROVED += 1
             #print(' ')
-
             # 解的接受
             p = random.random()
             #模拟退火
