@@ -79,7 +79,7 @@ class hh_env(gym.Env):
                 self.NOT_ACCEPTED += 1
 
     def acceptA(self, newTime, newSolution, action):
-        #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
+        # print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
         if self.prevTime > newTime:
             self.improveCount[action] += 1
             self.solution = newSolution
@@ -87,16 +87,16 @@ class hh_env(gym.Env):
             if (self.bestTime > newTime):
                 self.best_solution = newSolution
                 self.bestTime = newTime
-                #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
+                # print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
             self.NOT_ACCEPTED = 1
             self.NOT_IMPROVED = 1
         elif self.prevTime < newTime:
             self.NOT_IMPROVED += 1
-            #print(' ')
+            # print(' ')
             # 解的接受
             p = random.random()
-            #模拟退火
-            temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
+            # 模拟退火
+            temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED * 0.01))
             #
             if p < temp:
                 # print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
@@ -107,13 +107,13 @@ class hh_env(gym.Env):
                 self.NOT_ACCEPTED = 1
                 self.NOT_IMPROVED += 1
             else:
-                #print('declined!!!!!!!!!')
+                # print('declined!!!!!!!!!')
                 self.NOT_ACCEPTED += 1
                 self.NOT_IMPROVED += 1
         else:
             self.solution = newSolution
             self.prevTime = newTime
-            #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
+            # print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
             self.NOT_ACCEPTED += 1
             self.NOT_IMPROVED += 1
 

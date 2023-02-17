@@ -14,7 +14,7 @@ gym.logger.set_level(40)  # Block warning
 PROBLEM = 'MK02'
 MODULE_PATH = f"./hh_env-v0_DQN_0_MK09_1"
 LLH_SET = 1
-SOLVE_ITER = 10000
+SOLVE_ITER = 5000
 RENDER_TIMES = 10
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):

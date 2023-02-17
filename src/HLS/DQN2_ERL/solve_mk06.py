@@ -15,6 +15,7 @@ PROBLEM = 'MK06'
 LLH_SET = 4
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
+MODULE_PATH = f"./hh_env-v0_DQN_0_MK04_4"
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
@@ -24,7 +25,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'env_name': 'hh_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
-        'state_dim': 4,
+        'state_dim': 3,
         'action_dim': len(LLHolder(LLH_SET).set.llh),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
         'problem': PROBLEM,
@@ -41,7 +42,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
     args.eval_per_step = int(1e4)
-    actor_path = f"./hh_env-v0_DQN_0_MK06_4"
+    actor_path = MODULE_PATH
 
     render_agent(env_class, env_args, args.net_dims, agent_class, actor_path, render_times=RENDER_TIMES)
 

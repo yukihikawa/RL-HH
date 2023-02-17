@@ -13,7 +13,7 @@ from src.utils import parser
 
 
 #10个问题的最优解区间
-IDEAL_TIME = {'MK01': (36, 42), 'MK02': (27, 32), 'MK03': (204, 211), 'MK04': (60, 81), 'MK05': (168, 186), 'MK06': (60, 86), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 369), 'MK10': (165, 296)}
+IDEAL_TIME = {'MK01': (36, 40), 'MK02': (27, 30), 'MK03': (204, 2204), 'MK04': (60, 65), 'MK05': (168, 178), 'MK06': (60, 80), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 330), 'MK10': (165, 280)}
 BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 204, 'MK04': 60, 'MK05': 171, 'MK06': 57, 'MK07': 139, 'MK08': 523, 'MK09': 307, 'MK10': 197}
 
 class hh_env(gym.Env):
@@ -126,6 +126,28 @@ class hh_env(gym.Env):
             #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
             self.NOT_ACCEPTED += 1
             self.NOT_IMPROVED += 1
+
+    def acceptA(self, newTime, newSolution, action):
+        if self.bestTime > newTime:
+            self.improveCount[action] += 1
+            self.NOT_IMPROVED = 1
+            self.bestSolution = newSolution
+            self.bestTime = newTime
+        else:
+            self.NOT_IMPROVED += 1
+
+        if newTime <= self.prevTime:
+            self.NOT_ACCEPTED = 1
+            self.prevTime = newTime
+            self.prevSolution = newSolution
+        else:
+            print('self.NOT_ACCEPTED: ', self.NOT_ACCEPTED)
+            if random.random() < math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01)):
+                self.prevTime = newTime
+                self.prevSolution = newSolution
+                self.NOT_ACCEPTED = 1
+            else:
+                self.NOT_ACCEPTED += 1
 
     def reward3A(self, newTime):
 
