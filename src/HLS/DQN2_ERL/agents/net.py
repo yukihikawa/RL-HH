@@ -8,7 +8,7 @@ from torch.distributions.normal import Normal
 # import numpy.random as rd
 
 """DQN"""
-
+# 修改过mlp，使用不同激活函数
 
 class QNet(nn.Module):  # nn.Module is a standard PyTorch Network
     def __init__(self, dims: [int], state_dim: int, action_dim: int):
@@ -51,7 +51,22 @@ def build_mlp(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn
     if if_raw_out:
         del net_list[-1]  # delete the activation function of the output layer to keep raw output
     return nn.Sequential(*net_list)
+def build_mlp_ori(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn.Sequential:
+    """
+    build MLP (MultiLayer Perceptron)
 
+    dims: the middle dimension, `dims[-1]` is the output dimension of this network
+    activation: the activation function
+    if_remove_out_layer: if remove the activation function of the output layer.
+    """
+    if activation is None:
+        activation = nn.ReLU
+    net_list = []
+    for i in range(len(dims) - 1):
+        net_list.extend([nn.Linear(dims[i], dims[i + 1]), activation()])
+    if if_raw_out:
+        del net_list[-1]  # delete the activation function of the output layer to keep raw output
+    return nn.Sequential(*net_list)
 
 def layer_init_with_orthogonal(layer, std=1.0, bias_const=1e-6):
     torch.nn.init.orthogonal_(layer.weight, std)

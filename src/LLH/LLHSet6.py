@@ -2,7 +2,7 @@ import random
 import numpy as np
 
 from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx
-class LLHSet4:
+class LLHSet6:
 
     def __init__(self):
         #self.init_solution = init_solution
@@ -13,7 +13,7 @@ class LLHSet4:
         self.os_tabu2 = None
         self.llh = []
         self.llh.append(self.heuristic1)
-        self.llh.append(self.heuristic2A)
+        self.llh.append(self.heuristic2)
         self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic4)
         self.llh.append(self.heuristic5)
@@ -73,75 +73,82 @@ class LLHSet4:
                 tos = newOs
         return (tos, ms)
 
-    # 2. 机器码局部搜索
+    # 2. 机器码局部搜索，全搜一遍
     def heuristic2(self, os_ms, parameters):
 
         self.check_tabu(os_ms)
         (os, ms) = os_ms
         bestTime = timeTaken((os, ms), parameters)
-        idx = self.get_randon_zero_index(self.ms_tabu)
-        self.ms_tabu[idx] = 1
-        # newMs = changeMsRandom(idx, ms, parameters)
-        # for i in range(0, len(tms)):
-        #     newMs = changeMsRandom(i, ms, parameters)
-        #     if bestTime > timeTaken((os, newMs), parameters):
-        #         return (os, newMs)
         # 获取作业集合
         jobs = parameters['jobs']
-        mcLength = 0  # 工具人
-        jobIdx = -1  # 所属工作号
-        for job in jobs:
-            jobIdx += 1
-            if mcLength + len(job) >= idx + 1:
-                break
-            else:
-                mcLength += len(job)
-        opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
-        #开始搜索机器集合
-        for i in range(0, len(jobs[jobIdx][opIdx])):
-            newMs = ms.copy()
-            newMs[idx] = i
-            if bestTime > timeTaken((os, newMs), parameters):
-                return (os, newMs)
+        #print('ms_tabu', self.ms_tabu)
+        idx = self.get_randon_zero_index(self.ms_tabu)
+        self.ms_tabu[idx] = 1
+        for idx in range(0, len(ms)):
+            mcLength = 0  # 工具人
+            jobIdx = -1  # 所属工作号
+            for job in jobs:
+                jobIdx += 1
+                if mcLength + len(job) >= idx + 1:
+                    break
+                else:
+                    mcLength += len(job)
+            opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
+            # 开始搜索机器集合
+            for i in range(0, len(jobs[jobIdx][opIdx])):
+                newMs = ms.copy()
+                newMs[idx] = i
+                if bestTime > timeTaken((os, newMs), parameters):
+                    return (os, newMs)
         return (os, ms)
-
-    def heuristic2A(self, os_ms, parameters):
-        (os, ms) = os_ms
-        tms = ms.copy()
-        bestTime = timeTaken((os, tms), parameters)
-        for i in range(0, len(tms)):
-            newMs = changeMsRandom(i, ms, parameters)
-            if bestTime > timeTaken((os, newMs), parameters):
-                return (os, newMs)
-        return (os, tms)
 
 
 
     # 3. 并行局部搜索 改进在此
     def heuristic3(self, os_ms, parameters):
+        #print('called')
         #print('called!')
         self.check_tabu(os_ms)
         (os, ms) = os_ms
-        tos = os.copy()
-        tms = ms.copy()
+
+        bestTime = timeTaken((os, ms), parameters)
+        # 获取作业集合
+        jobs = parameters['jobs']
         # print(tos)
         # idx = random.randint(0, len(tos) - 1)
         idx = self.get_randon_zero_index(self.os_tabu2)
         self.os_tabu2[idx] = 1
 
-        bestTime = timeTaken((tos, ms), parameters)
-        # print('selected position: ', idx)
-        for i in range(0, len(tos)):
-            newOs = tos.copy()
+        # 获取作业编号
+
+        #print('selected position: ', idx)
+
+        for i in range(0, len(os)):
+            newOs = os.copy()
             k = newOs[idx]
             newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
             newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
-            machineIdx = getMachineIdx(i, os, parameters)
-            newMs = changeMsRandom(machineIdx, ms, parameters)
-            # print(newOs)
-            if bestTime > timeTaken((newOs, newMs), parameters):
-                return (newOs, newMs)
-        return (tos, tms)
+            # 工序新位置到位
+            # 开始机器码搜索
+            machineIdx = getMachineIdx(i, newOs, parameters)
+            #print('machineIdx: ', machineIdx)
+            mcLength = 0  # 工具人
+            jobIdx = -1  # 所属工作号
+            for job in jobs:
+                jobIdx += 1
+                if mcLength + len(job) >= machineIdx + 1:
+                    break
+                else:
+                    mcLength += len(job)
+            #print('jobIdx: ', jobIdx)
+            opIdx = machineIdx - mcLength
+            #print('opIdx: ', opIdx)
+            for j in range(0, len(jobs[jobIdx][opIdx])):
+                newMs = ms.copy()
+                newMs[machineIdx] = j
+                if bestTime > timeTaken((newOs, newMs), parameters):
+                    return (newOs, newMs)
+        return (os, ms)
 
     # =====================变异操作++++++++++++++++++
     # 4 随机交换两个工序码, 返回新的工序码 已测

@@ -15,9 +15,9 @@ from src.utils import config
 
 # Beginning
 # Parameters Setting
-strs = '../../Brandimarte_Data/Mk10.fjs'
+strs = '../../Brandimarte_Data/Mk06.fjs'
 para = parser.parse(strs) # 导入数据
-llh_set = 1
+llh_set = 6
 ss = sshh.SequenceSelection(llh_set)
 
 

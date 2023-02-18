@@ -12,7 +12,7 @@ from env import hh_env
 gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK04'
-LLH_SET = 4
+LLH_SET = 6
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
 MODULE_PATH = f"./hh_env-v0_DQN_0_MK06_FINE"

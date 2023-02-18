@@ -66,7 +66,7 @@ class hh_env(gym.Env):
         termination = self.terminationA()
 
         # 奖励
-        reward = self.reward3A(newTime)
+        reward = self.rewardNeoA(newTime, termination)
         #reward = self.reward_function(newTime)
         #print(" newTime: ", newTime)
         # 解的接受
@@ -103,7 +103,7 @@ class hh_env(gym.Env):
             self.NOT_IMPROVED += 1
             #print(' ')
 
-            # 解的接受
+            # 非改进解的接受
             p = random.random()
             #模拟退火
             temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
@@ -149,7 +149,7 @@ class hh_env(gym.Env):
             else:
                 self.NOT_ACCEPTED += 1
 
-    def reward3A(self, newTime):
+    def reward3A(self, newTime, terminal = None):
 
 
         if self.prevTime > newTime:
@@ -180,7 +180,53 @@ class hh_env(gym.Env):
                 # print("mut reward: ", reward)
         return reward
 
+    def rewardNeoA(self, newTime, termination):
+        if self.prevTime > newTime:
+            if self.bestTime > newTime:
+                reward = (self.bestTime - newTime) + 3 / newTime
+                reward *= 300
+                self.rewardImpP += reward
+            else:
+                reward = 1 / newTime
+                reward *= 5
+                self.rewardImpL += reward
+        else:
+            if self.prevTime == newTime:
+                reward = -0.03 + 1 / self.bestTime
+                reward *= 10
+                self.rewardSta += reward
+            else:
+                reward = -0.02 + 1 / self.bestTime
+                reward *= 5
+                self.rewardMut += reward
+        if termination:
+            if self.bestTime <= self.TERMINATION_TIME:
+                reward += 1000
+                self.rewardEnd += reward
+        return reward
 
+    def rewardNeo(self, newTime, termination):
+        if newTime < self.bestTime: #主线任务奖励
+            reward = 10 * (self.bestTime - newTime) * (self.oriTime / newTime)
+            # reward = 100
+            self.rewardImpP += reward
+        elif newTime >= self.bestTime & newTime < self.prevTime:
+            reward = 0.5
+            self.rewardImpL += reward
+        elif newTime == self.prevTime:
+            reward = 0
+            self.rewardSta += reward
+        else:
+            if random.random() < math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01)):
+                reward = 10
+            else:
+                reward = 2
+            self.rewardMut += reward
+        if termination:
+            if self.bestTime <= self.TERMINATION_TIME:
+                reward += 2000
+                self.rewardEnd += reward
+        return reward
 
     def terminationA(self):
         #if self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1]) or self.ITER > 5000:
@@ -192,7 +238,7 @@ class hh_env(gym.Env):
         self.heuristics = LLHolder(self.llh_set).set.llh
         # print('llh_set: ', self.llh_set)
         # print("heuristics: ", self.heuristics)
-        self.TERMINATION_TIME = BEST_TIME[self.problem]
+        self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.parameters = parser.parse(self.problem_path)
         self.best_solution = self.solution = encoding.initializeResult(self.parameters)
         # print(self.best_solution[0])
