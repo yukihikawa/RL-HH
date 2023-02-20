@@ -2,7 +2,7 @@ import os
 import gym
 import torch
 import matplotlib.pyplot as plt
-from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
+from src.HLS.DQN2_ERL_VNS.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN
@@ -12,10 +12,10 @@ from env import hh_env
 gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK02'
-LLH_SET = 4
+LLH_SET = 6
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
-MODULE_PATH = f"./hh_env-v0_DQN_0_MK06_FINE"
+MODULE_PATH = f"./hh_env-v0_DQN_0_MK04_6"
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
@@ -32,13 +32,13 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'problem_path': os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs"),
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
-        'train': True
+        'train': False
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
     args = Config(agent_class, env_class, env_args)  # see `config.py Arguments()` for hyperparameter explanation
     args.break_step = int(1e5)  # break training if 'total_step > break_step'
-    args.net_dims = (64, 64, 32)  # the middle layer dimension of MultiLayer Perceptron
+    args.net_dims = (256, 246, 512)  # the middle layer dimension of MultiLayer Perceptron
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
     args.eval_per_step = int(1e4)

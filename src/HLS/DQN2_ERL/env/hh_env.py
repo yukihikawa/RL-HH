@@ -7,7 +7,7 @@ from gym import spaces
 
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
-from src.HLS.DQN2_ERL.train import config
+from src.HLS.DQN2_ERL_VNS.train import config
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 

@@ -2,7 +2,7 @@ import os
 import gym
 import torch
 
-from src.HLS.DQN2_ERL.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
+from src.HLS.DQN2_ERL_VNS.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHolder import LLHolder
 from src.HLS.DQN2_ERL_NEW_ENV.train.config import Config, get_gym_env_args, build_env
 from src.HLS.DQN2_ERL_NEW_ENV.agents.AgentDQN import AgentDQN

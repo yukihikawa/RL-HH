@@ -55,27 +55,26 @@ class LLHSet6:
 
         self.check_tabu(os_ms)
         (os, ms) = os_ms
-        tos = os.copy()
+        # tos = os.copy()
         # print(tos)
         # idx = random.randint(0, len(tos) - 1)
         idx = self.get_randon_zero_index(self.os_tabu)
         self.os_tabu[idx] = 1
 
-        bestTime = timeTaken((tos, ms), parameters)
+        bestTime = timeTaken((os, ms), parameters)
         # print('selected position: ', idx)
-        for i in range(0, len(tos)):
-            newOs = tos.copy()
+        for i in range(0, len(os)):
+            newOs = os.copy()
             k = newOs[idx]
             newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
             newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
             # print(newOs)
             if bestTime > timeTaken((newOs, ms), parameters):
-                tos = newOs
-        return (tos, ms)
+                return (newOs, ms)
+        return (os, ms)
 
     # 2. 机器码局部搜索，全搜一遍
     def heuristic2(self, os_ms, parameters):
-
         self.check_tabu(os_ms)
         (os, ms) = os_ms
         bestTime = timeTaken((os, ms), parameters)

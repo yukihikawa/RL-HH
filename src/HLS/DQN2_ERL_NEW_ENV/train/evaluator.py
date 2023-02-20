@@ -4,7 +4,7 @@ import torch.nn
 import numpy as np
 from torch import Tensor
 
-from src.HLS.DQN2_ERL.train.config import Config
+from src.HLS.DQN2_ERL_VNS.train.config import Config
 
 '''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 

@@ -5,9 +5,9 @@ import numpy as np
 import torch.multiprocessing as mp  # torch.multiprocessing extends multiprocessing of Python
 
 from multiprocessing import Process, Pipe
-from src.HLS.DQN2_ERL.train.config import Config, build_env
-from src.HLS.DQN2_ERL.train.replay_buffer import ReplayBuffer
-from src.HLS.DQN2_ERL.train.evaluator import Evaluator, get_rewards_and_steps
+from src.HLS.DQN2_ERL_VNS.train.config import Config, build_env
+from src.HLS.DQN2_ERL_VNS.train.replay_buffer import ReplayBuffer
+from src.HLS.DQN2_ERL_VNS.train.evaluator import Evaluator, get_rewards_and_steps
 
 '''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 

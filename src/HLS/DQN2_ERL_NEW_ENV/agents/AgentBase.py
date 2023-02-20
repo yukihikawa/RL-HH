@@ -4,8 +4,8 @@ from typing import Tuple
 from torch import Tensor
 from torch.nn.utils import clip_grad_norm_
 
-from src.HLS.DQN2_ERL.train.config import Config
-from src.HLS.DQN2_ERL.train.replay_buffer import ReplayBuffer
+from src.HLS.DQN2_ERL_VNS.train.config import Config
+from src.HLS.DQN2_ERL_VNS.train.replay_buffer import ReplayBuffer
 
 '''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 

@@ -3,10 +3,10 @@ from typing import Tuple
 from copy import deepcopy
 from torch import Tensor
 
-from src.HLS.DQN2_ERL.agents.AgentBase import AgentBase
-from src.HLS.DQN2_ERL.agents.net import QNet
-from src.HLS.DQN2_ERL.train.config import Config
-from src.HLS.DQN2_ERL.train.replay_buffer import ReplayBuffer
+from src.HLS.DQN2_ERL_VNS.agents.AgentBase import AgentBase
+from src.HLS.DQN2_ERL_VNS.agents.net import QNet
+from src.HLS.DQN2_ERL_VNS.train.config import Config
+from src.HLS.DQN2_ERL_VNS.train.replay_buffer import ReplayBuffer
 
 '''[ElegantRL.2022.12.12](github.com/AI4Fiance-Foundation/ElegantRL)'''
 
