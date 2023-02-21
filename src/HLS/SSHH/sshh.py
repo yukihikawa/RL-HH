@@ -18,7 +18,7 @@ class SequenceSelection:
         self.prevTime = 10000
         self.bestTime = 10000
         self.best_solution = None
-        #self.prev_solution = None
+        self.prev_solution = None
 
     # 定义一个函数,该函数接受一个状态,根据状态转移矩阵,返回一个状态
     # 从当前状态i转移到下一个状态j的概率定义为矩阵第 i 行第 j 列的值除以第 i 行所有元素之和
@@ -42,10 +42,10 @@ class SequenceSelection:
     # 接收概率由 FLAG 变量决定,当非更优解未被接受时,FLAG+1, FLAG 越大,非改进解被接受的概率越高.当解被接受时,FLAG=1
     # 仅当改进解被接受时更新状态转移矩阵
     # 更新 prevState, 返回新的 solution
-    def update_solution(self, solution, parameters):
+    def update_solution(self, parameters):
         nextState = self.next_state(self.prevState)
         #print('llh called: ', nextState)
-        new_solution = self.heuristics[nextState](solution, parameters)
+        new_solution = self.heuristics[nextState](self.prev_solution, parameters)
         #prevTime = llh.timeTaken(solution, parameters)
         newTime = llh.timeTaken(new_solution, parameters)
 
@@ -54,15 +54,15 @@ class SequenceSelection:
 
             self.update_transition_matrix(self.prevState, nextState)
             self.prevTime = newTime
-            #self.prev_solution = new_solution
+            self.prev_solution = new_solution
             # self.prevState = nextState
             self.FLAG = 1
             if self.bestTime > newTime:
-                print('newTime: ', newTime, 'prevTime: ', self.prevTime, 'beat time', self.bestTime)
+                print('newTime: ', newTime, 'prevTime: ', self.prevTime, 'best time', self.bestTime)
                 self.bestTime = newTime
                 self.best_solution = new_solution
 
-            return new_solution
+            #return new_solution
         else:
             p = random.random()
             temp = np.exp(-(newTime - self.prevTime) / (self.FLAG * 0.01))
@@ -71,12 +71,13 @@ class SequenceSelection:
             if p < temp:
                 #print('accepted!')
                 self.prevTime = newTime
+                self.prev_solution = new_solution
                 self.FLAG = 1
                 # self.prevState = nextState
-                return new_solution
+                #return new_solution
 
             else:
                 self.FLAG += 1
-                return solution
+                #return solution
 
 

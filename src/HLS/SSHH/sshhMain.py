@@ -15,7 +15,7 @@ from src.utils import config
 
 # Beginning
 # Parameters Setting
-strs = '../../Brandimarte_Data/Mk06.fjs'
+strs = '../../Brandimarte_Data/Mk04.fjs'
 para = parser.parse(strs) # 导入数据
 llh_set = 1
 ss = sshh.SequenceSelection(llh_set)
@@ -23,15 +23,15 @@ ss = sshh.SequenceSelection(llh_set)
 
 t0 = time.time()
 # Initialize the Population
-ss.best_solution = solution = (encoding.generateOS(para), encoding.generateMS(para))
+ss.best_solution = ss.prev_solution = (encoding.generateOS(para), encoding.generateMS(para))
 
-ss.prevTime = oriTime = llhUtils.timeTaken(ss.best_solution, para)
+ss.bestTime = ss.prevTime = oriTime = llhUtils.timeTaken(ss.best_solution, para)
 print('Ori time:', oriTime)
 
 for epoch in range(0, 5000):
     #print('epoch:', epoch)
-    solution = ss.update_solution(solution, para)
-    newTime = llhUtils.timeTaken(solution, para)
+    ss.update_solution(para)
+    newTime = llhUtils.timeTaken(ss.prev_solution, para)
     #print('time:', newTime)
 
 

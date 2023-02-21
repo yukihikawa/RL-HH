@@ -1,6 +1,7 @@
 import os
 import gym
 
+from src.LLH.LLHSetVNS import LLHSetVNS
 from src.LLH.LLHolder import LLHolder
 from train.config import Config
 from agents.AgentDQN import AgentDQN
@@ -10,23 +11,24 @@ gym.logger.set_level(40)  # Block warning
 
 
 PROBLEM = 'MK02'
-LLH_SET = 6
+PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
+LLH_SET = 'VNS'
 SOLVE_ITER = 5000
 
 
 def train_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
     env_class = gym.make
-    holder = LLHolder(LLH_SET)
+    holder = LLHSetVNS(PROBLEM_PATH)
     env_args = {
         'env_name': 'vns_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
         'state_dim': 3,
-        'action_dim': len(LLHolder(LLH_SET).set.llh),  # (Push cart to the left, Push cart to the right)
+        'action_dim': len(holder.llh),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
         'problem': PROBLEM,
-        'problem_path': os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs"),
+        'problem_path': PROBLEM_PATH,
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
         'train': True

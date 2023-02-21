@@ -51,7 +51,8 @@ class hh_env(gym.Env):
         # self.if_discrete = True  # discrete action or continuous action
 
     def step(self, action):
-        #print('llh_set: ', self.llh_set)
+        # print('training?', self.train)
+        # print('llh_set: ', self.llh_set)
         #print(len(self.heuristics))
         #action_c = np.argmax(action)
         action_c = action
@@ -88,6 +89,7 @@ class hh_env(gym.Env):
         return s_, reward, termination, {}
 
     def accept(self, newTime, newSolution, action):
+        #print('training?', self.train)
         #print("train", self.train, "iter: ", self.ITER, "new bestTime: ", self.bestTime, 'llh called: ', action)
         if self.prevTime > newTime:
             self.improveCount[action] += 1
@@ -240,7 +242,10 @@ class hh_env(gym.Env):
         # print("heuristics: ", self.heuristics)
         self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.parameters = parser.parse(self.problem_path)
-        self.best_solution = self.solution = encoding.initializeResult(self.parameters)
+        if self.train:
+            self.best_solution = self.solution = encoding.initializeFixedResult(self.parameters)
+        else:
+            self.best_solution = self.solution = encoding.initializeResult(self.parameters)
         # print(self.best_solution[0])
         # print(self.best_solution[1])
         self.NOT_ACCEPTED = 1
