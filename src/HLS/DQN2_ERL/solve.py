@@ -11,11 +11,11 @@ from env import hh_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK01'
+PROBLEM = 'MK06'
 LLH_SET = 4
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
-MODULE_PATH = f"./hh_env-v0_DQN_0_MK06_FINE"
+MODULE_PATH = f"./hh_env-v0_DQN_0_MK02_4"
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
@@ -38,7 +38,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
 
     args = Config(agent_class, env_class, env_args)  # see `config.py Arguments()` for hyperparameter explanation
     args.break_step = int(1e5)  # break training if 'total_step > break_step'
-    args.net_dims = (64, 64, 32)  # the middle layer dimension of MultiLayer Perceptron
+    args.net_dims = (256, 256, 512)  # the middle layer dimension of MultiLayer Perceptron
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
     args.eval_per_step = int(1e4)
