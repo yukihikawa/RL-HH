@@ -35,9 +35,18 @@ class hh_env(gym.Env):
         # 定义状态空间
         # self.observation_space = spaces.Box(low=-float('inf'), high=float('inf'), shape=(1,))
         # self.observation_space = spaces.Tuple((spaces.Discrete(len(self.heuristics)), spaces.Discrete(5000), spaces.Box(-float('inf'), float('inf'), shape=(1,))))
+
+        # 配合前两版状态
         low = np.array([0.0, 0, -float('inf')])
         high = np.array([len(self.heuristics), self.solve_iter, float('inf')])
+
+        #配合新版状态（cla那版）
+        low = np.array([20, 0, -float('inf')])
+        high = np.array([40, self.solve_iter, float('inf')])
+
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
+
+        #
         # self.observation_space = spaces.Discrete(10)
         # self.state = None
         # self.env_name = 'hh_env'  # the name of this env.
@@ -65,14 +74,26 @@ class hh_env(gym.Env):
         # 解的接受
         self.accept(newTime, newSolution, action_c)
 
+        #OLDSTATE
+        # if action_c in [3, 5, 6]:
+        #     # if action in [0, 1, 2]:
+        #     ck = 20
+        # else:
+        #     ck = 40
+        # delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
+        # s_ = np.array([action_c, self.NOT_IMPROVED, delta])
 
+        # NEW_STATE
+        # delta = self.prevTime - newTime
+        # s_ = np.array([action_c, self.NOT_IMPROVED, delta])
+
+        #newstate2
+        delta = self.prevTime - newTime
         if action_c in [3, 5, 6]:
-            # if action in [0, 1, 2]:
-            ck = 20
+            cla = 20
         else:
-            ck = 40
-        delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
-        s_ = np.array([action_c, self.NOT_IMPROVED, delta])
+            cla = 40
+        s_ = np.array([cla, self.NOT_IMPROVED, delta])
 
         if termination:
             self.render()
@@ -141,6 +162,8 @@ class hh_env(gym.Env):
                 # print("mut reward: ", reward)
         return reward
 
+    def reward3B(self, newTime):
+        pass
     def endReward4(self):
         #BestTime越小,奖励值越高
         if (self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1] + 1)):

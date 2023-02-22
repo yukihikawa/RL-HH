@@ -326,7 +326,8 @@ def draw_learning_curve(recorder: np.ndarray = None,
 
     ax11 = axs[1].twinx()
     color11 = 'darkcyan'
-    ax11.set_ylabel('objC', color=color11)
+    # ax11.set_ylabel('objC', color=color11)
+    ax11.set_ylabel('loss', color=color11)
     ax11.fill_between(steps, obj_c, facecolor=color11, alpha=0.2, )
     ax11.tick_params(axis='y', labelcolor=color11)
 
