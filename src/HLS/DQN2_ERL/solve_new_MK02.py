@@ -13,12 +13,12 @@ from env import hh_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK03'
+PROBLEM = 'MK02'
 LLH_SET = 1
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
-ACTOR_PATH = f"./hh_env-v0_DQN_0_MK02"
-MODULE = '/actor__000000082432_00255.599.pt'
+ACTOR_PATH = f"./hh_env-v0_DQN_0_MK06"
+MODULE = '/actor__000000143872_00150.467.pt'
 STATE = 'cla'
 REWARD = 'reward3 + endReward4'
 

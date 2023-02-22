@@ -1,0 +1,57 @@
+appdirs==1.4.4
+Bottleneck @ file:///C:/Windows/Temp/abs_3198ca53-903d-42fd-87b4-03e6d03a8381yfwsuve8/croots/recipe/bottleneck_1657175565403/work
+box2d-py==2.3.5
+certifi @ file:///C:/b/abs_85o_6fm0se/croot/certifi_1671487778835/work/certifi
+charset-normalizer==3.0.1
+click==8.1.3
+cloudpickle==2.2.1
+colorama==0.4.6
+contourpy @ file:///C:/b/abs_d5rpy288vc/croots/recipe/contourpy_1663827418189/work
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+docker-pycreds==0.4.0
+fonttools==4.25.0
+gitdb==4.0.10
+GitPython==3.1.30
+gym==0.25.2
+gym-notices==0.0.8
+idna==3.4
+importlib-metadata==6.0.0
+kiwisolver @ file:///C:/b/abs_88mdhvtahm/croot/kiwisolver_1672387921783/work
+matplotlib @ file:///C:/b/abs_03z_dj2gty/croot/matplotlib-suite_1670466145509/work
+mkl-fft==1.3.1
+mkl-random @ file:///C:/ci/mkl_random_1626186184308/work
+mkl-service==2.4.0
+munkres==1.1.4
+numexpr @ file:///C:/b/abs_a7kbak88hk/croot/numexpr_1668713882979/work
+numpy==1.24.1
+packaging @ file:///C:/b/abs_cfsup8ur87/croot/packaging_1671697442297/work
+pandas @ file:///C:/b/abs_c6fuezktfm/croot/pandas_1670425103552/work
+pathtools==0.1.2
+Pillow==9.4.0
+ply==3.11
+protobuf==4.21.12
+psutil==5.9.4
+pygame==2.1.0
+pyparsing @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_7f_7lba6rl/croots/recipe/pyparsing_1661452540662/work
+PyQt5==5.15.7
+PyQt5-sip @ file:///C:/Windows/Temp/abs_d7gmd2jg8i/croots/recipe/pyqt-split_1659273064801/work/pyqt_sip
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pytz @ file:///C:/b/abs_22fofvpn1x/croot/pytz_1671698059864/work
+PyYAML==6.0
+requests==2.28.2
+sentry-sdk==1.13.0
+setproctitle==1.3.2
+sip @ file:///C:/Windows/Temp/abs_b8fxd17m2u/croots/recipe/sip_1659012372737/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+smmap==5.0.0
+swig==4.1.1
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+torch==1.13.1+cu117
+torchaudio==0.13.1+cu117
+torchvision==0.14.1+cu117
+tornado @ file:///C:/ci/tornado_1662458743919/work
+typing_extensions==4.4.0
+urllib3==1.26.14
+wandb==0.13.9
+wincertstore==0.2
+zipp==3.11.0
