@@ -1,8 +1,11 @@
 import os
+import time
+
 import gym
 import torch
-import matplotlib.pyplot as plt
+
 from src.HLS.DQN2_ERL_VNS.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
+from src.LLH.LLHSetVNS import LLHSetVNS
 from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN
@@ -11,28 +14,32 @@ from env import vns_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK01'
-LLH_SET = 4
+PROBLEM = 'MK06'
+PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
+LLH_SET = 'VNS'
 SOLVE_ITER = 5000
 RENDER_TIMES = 20
-MODULE_PATH = f"./hh_env-v0_DQN_0_MK06_FINE"
+ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS"
+MODULE = '/actor__000000041472_19194.334.pt'
+STATE = 'cla'
+REWARD = 'simple'
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
     env_class = gym.make
-
+    holder = LLHSetVNS(PROBLEM_PATH)
     env_args = {
         'env_name': 'vns_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
         'state_dim': 3,
-        'action_dim': len(LLHolder(LLH_SET).set.llh),  # (Push cart to the left, Push cart to the right)
+        'action_dim': len(holder.llh),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
         'problem': PROBLEM,
-        'problem_path': os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs"),
+        'problem_path': PROBLEM_PATH,
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
-        'train': True
+        'train': False
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
@@ -42,7 +49,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
     args.eval_per_step = int(1e4)
-    actor_path = MODULE_PATH
+    actor_path = ACTOR_PATH
 
     render_agent(env_class, env_args, args.net_dims, agent_class, actor_path, render_times=RENDER_TIMES)
 
@@ -53,30 +60,27 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
     state_dim = env_args['state_dim']
     action_dim = env_args['action_dim']
     agent = agent_class(net_dims, state_dim, action_dim, gpu_id=-1)
-    agent.save_or_load_agent(actor_path, if_save=False)
+    # agent.save_or_load_agent(actor_path, if_save=False)
     actor = agent.act
     del agent
 
-    # print(f"| render and load actor from: {actor_path}")
-    # actor.load_state_dict(torch.load(actor_path, map_location=lambda storage, loc: storage))
+    print(f"| render and load actor from: {actor_path}")
+    actor.load_state_dict(torch.load(actor_path + MODULE, map_location=lambda storage, loc: storage).state_dict())
     allResult = {}
-    rewardStatus = {}
+    timeUsed = {}
     for i in range(render_times):
+        t0 = time.time()
         cumulative_reward, episode_step, bestTime = get_rewards_and_steps_solve(env, actor, if_render=False)
         print(f"|{i:4}  cumulative_reward {cumulative_reward:9.3f}  episode_step {episode_step:5.0f}")
+        t1 = time.time()
         allResult['test ' + str(i)] = bestTime
-        rewardStatus[cumulative_reward] = bestTime
+        timeUsed['test ' + str(i)] = t1 - t0
+    print('problem: ', PROBLEM, 'LLH_SET: ', LLH_SET)
+    print('state: ', STATE, 'reward: ', REWARD, 'actor_path: ', actor_path, '  MODULE: ', MODULE, 'net_dims: ', net_dims)
     print(allResult.values())
-    print(rewardStatus.values())
-    print(rewardStatus.keys())
+    print(timeUsed.values())
     print('average time: ', sum(allResult.values()) / len(allResult.values()))
-    y = list(rewardStatus.keys())
-    x = list(rewardStatus.values())
-
-    plt.scatter(x, y)
-    plt.xlabel('time')
-    plt.ylabel('reward')
-    plt.show()
+    print('average time used: ', sum(timeUsed.values()) / len(timeUsed.values()))
 
 
 

@@ -11,7 +11,7 @@ from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
 
-PROBLEM = 'MK09'
+PROBLEM = 'MK06'
 GEN_NUM =5000
 TEST_ITER = 10
 LLH_SET = 1

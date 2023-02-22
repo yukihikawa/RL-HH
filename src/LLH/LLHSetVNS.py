@@ -27,9 +27,12 @@ class LLHSetVNS():
         self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic4)
         self.llh.append(self.heuristic5)
-        self.llh.append(self.heuristicA)
+        # self.llh.append(self.heuristicA)
         self.llh.append(self.heuristicB)
-        self.llh.append(self.heuristicC)
+        # self.llh.append(self.heuristicC)
+        self.llh.append(self.heuristicD)
+        self.llh.append(self.heuristicE)
+        self.llh.append(self.heuristicF)
 
     # 工具方法,更新最优解
     def update_best_solution(self):
@@ -244,3 +247,75 @@ class LLHSetVNS():
         new_time = timeTaken((newOs, newMs), self.parameters)
         self.previous_solution = (newOs, newMs)
         self.previous_time = new_time
+
+    # 小邻域结构==============================
+
+    # 8. 工序码随机交换同时随机改变对应位置机器码 已测
+    def heuristicD(self):
+
+        (os, ms) = self.previous_solution
+        while(True):
+            newOs = os.copy()
+            newMs = ms.copy()
+            # 随机选择两个工序码
+            ida = idb = random.randint(0, len(os) - 1)
+            while ida == idb:
+                idb = random.randint(0, len(os) - 1)
+            # 交换工序码
+            newOs[ida], newOs[idb] = newOs[idb], newOs[ida]
+            # 定位机器码
+            machineIda = getMachineIdx(ida, os, self.parameters)
+            machineIdb = getMachineIdx(idb, os, self.parameters)
+            # 随机改变机器码
+            newMs = changeMsRandom(machineIda, newMs, self.parameters)
+            newMs = changeMsRandom(machineIdb, newMs, self.parameters)
+
+            # 替换当前解,跳出邻域
+            new_time = timeTaken((newOs, newMs), self.parameters)
+            # if new_time != self.previous_time:
+            #     self.previous_solution = (newOs, newMs)
+            #     self.previous_time = new_time
+            #     return
+            self.previous_solution = (newOs, newMs)
+            self.previous_time = new_time
+            return
+
+    # 5. 随机改变单个机器码 已测
+    def heuristicE(self):
+        (os, ms) = self.previous_solution
+        while(True):
+            machineIdx = random.randint(0, len(ms) - 1)
+            # ('selected idx : ', machineIdx)
+            newMs = changeMsRandom(machineIdx, ms, self.parameters)
+            new_Time = timeTaken((os, newMs), self.parameters)
+            # if new_Time != self.previous_time:
+            #     # 替换当前解,跳出邻域
+            #     self.previous_solution = (os, newMs)
+            #     self.previous_time = new_Time
+            #     return
+            self.previous_solution = (os, newMs)
+            self.previous_time = new_Time
+            return
+
+
+    # 1. 随机交换两个工序码, 返回新的工序码 已测
+    def heuristicF(self):
+        # print('1')
+        # 随机选择两个不同机器码
+        (os, ms) = self.previous_solution
+        while(True):
+            ida = idb = random.randint(0, len(os) - 1)
+            while ida == idb:
+                idb = random.randint(0, len(os) - 1)
+
+            newOs = os.copy()
+            newOs[ida], newOs[idb] = newOs[idb], newOs[ida]
+            new_time = timeTaken((newOs, ms), self.parameters)
+            # if new_time != self.previous_time:
+            #     # 替换当前解,跳出邻域
+            #     self.previous_solution = (newOs, ms)
+            #     self.previous_time = new_time
+            #     return
+            self.previous_solution = (newOs, ms)
+            self.previous_time = new_time
+            return

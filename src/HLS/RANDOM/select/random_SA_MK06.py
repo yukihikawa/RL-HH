@@ -12,9 +12,9 @@ from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
 
-PROBLEM = 'MK06'
-GEN_NUM =500
-TEST_ITER = 10
+PROBLEM = 'MK07'
+GEN_NUM =5000
+TEST_ITER = 20
 LLH_SET = 1
 
 def runForTest(problem, genNum, LLH):

@@ -1,24 +1,31 @@
+import random
+
 from src.LLH.LLHSetVNS import LLHSetVNS
 import os
 
-problem = 'MK04'
+problem = 'MK09'
 problem_str = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + problem + ".fjs")
-set = LLHSetVNS(problem_str)
-print(set.previous_time)
-# for i in range(0, 40):
+set = LLHSetVNS()
+# print(set.previous_time)
+set.reset(problem_str)
+# for i in range(0, 50):
 #     # set.reset()
 #     print('ori: ', set.previous_time)
-#     for i in range(0, 40):
-#         set.heuristic3()
-#         set.heuristic1()
-#         set.heuristic2()
+#     for i in range(0, 100):
+#         # 随机选取 0-4
+#         idx = random.randint(0, 4)
+#         # 执行对应的函数
+#         set.llh[idx]()
 #     print("local optimum: ", set.previous_time)
 #     print('best: ', set.best_time)
-#     set.heuristicA()
+#     # 随机选取 5-7
+#     idx = random.randint(5, 7)
+#     # 执行对应的函数
+#     set.llh[idx]()
 #     print("new: ", set.previous_time)
 for i in range(0, 40):
-    set.reset()
+    set.reset(problem_str)
     print('ori: ', set.previous_time)
-    set.heuristic6()
+    set.heuristicD()
     print("new: ", set.previous_time)
     print(' ')
