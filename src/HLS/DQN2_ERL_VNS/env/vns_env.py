@@ -114,7 +114,7 @@ class vns_env(gym.Env):
         if terminal:
             scale = 1000 #控制峰值
             base = 0.95  # 控制指数衰减的基数，可以调整以改变函数的形状
-            offset = self.TARGET  # 控制函数在x=30处的取值，可以调整以改变函数的峰值
+            offset = self.TARGET  # 控制函数在Target处的取值，可以调整以改变函数的峰值
             reward += (1 + math.exp(-base * (self.vns.best_time - offset) ** 2)) * scale
         return reward
 
@@ -130,6 +130,7 @@ class vns_env(gym.Env):
         # print('llh_set: ', self.llh_set)
         # print("heuristics: ", self.heuristics)
         self.vns.train = self.train
+        print('train: ', self.vns.train)
         self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.TARGET = BEST_TIME[self.problem]
         self.vns.reset(self.problem_path) # 重设底层 LLH

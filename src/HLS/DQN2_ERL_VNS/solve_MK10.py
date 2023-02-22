@@ -14,15 +14,15 @@ from env import vns_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK01'
+PROBLEM = 'MK10'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS'
 SOLVE_ITER = 2000
 RENDER_TIMES = 20
 ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS"
-MODULE = '/actor__000000061952_19738.334.pt'
+MODULE = '/actor__000000020992_19114.666.pt'
 STATE = 'cla'
-REWARD = 'simple'
+REWARD = 'simple1'
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm

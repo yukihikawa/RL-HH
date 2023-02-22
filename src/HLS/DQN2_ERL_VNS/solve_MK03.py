@@ -14,10 +14,10 @@ from env import vns_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK01'
+PROBLEM = 'MK03'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS'
-SOLVE_ITER = 2000
+SOLVE_ITER = 500
 RENDER_TIMES = 20
 ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS"
 MODULE = '/actor__000000061952_19738.334.pt'
