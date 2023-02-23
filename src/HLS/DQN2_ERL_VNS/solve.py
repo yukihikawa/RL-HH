@@ -14,13 +14,13 @@ from env import vns_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK10'
+PROBLEM = 'MK06'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS'
-SOLVE_ITER = 1000
-RENDER_TIMES = 20
-ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS"
-MODULE = '/actor__000000020992_19114.666.pt'
+SOLVE_ITER = 2000
+RENDER_TIMES = 5
+ACTOR_PATH = f"./vns_env-v0_DQN_0_MK06_VNS"
+MODULE = '/actor__000000143872_12965.667.pt'
 STATE = 'cla'
 REWARD = 'simple'
 
@@ -64,7 +64,7 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
     actor = agent.act
     del agent
 
-    print(f"| render and load actor from: {actor_path}")
+    print(f"| render and load actor from: {actor_path} {MODULE}")
     actor.load_state_dict(torch.load(actor_path + MODULE, map_location=lambda storage, loc: storage).state_dict())
     allResult = {}
     timeUsed = {}
