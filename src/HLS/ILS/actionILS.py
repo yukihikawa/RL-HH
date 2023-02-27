@@ -45,7 +45,7 @@ class action:
         self.time_limit = 160
         self.iter_start = self.time_start
 
-        self.NoE = 30
+        self.NoE = 80
 
     # 设置单次迭代开始时间
     def set_iter_start(self):

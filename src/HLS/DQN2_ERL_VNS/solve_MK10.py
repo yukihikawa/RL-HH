@@ -16,7 +16,7 @@ gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK10'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-LLH_SET = 'VNS'
+LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
 RENDER_TIMES = 20
 # 效果不错
@@ -35,7 +35,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'env_name': 'vns_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken
 
-        'state_dim': 3,
+        'state_dim': 1,
         'action_dim': len(holder.llh),  # (Push cart to the left, Push cart to the right)
         'if_discrete': True,  # discrete action space
         'problem': PROBLEM,
