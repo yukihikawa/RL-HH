@@ -22,6 +22,8 @@ BEST_TIME = {'MK01': 40, 'MK02': 26, 'MK03': 203, 'MK04': 60, 'MK05': 171, 'MK06
 class vns_env(gym.Env):
     def __init__(self, problem = '', problem_path = '', llh_set = 1, solve_iter = 5000, train = True):
         self.train = train
+        self.time_limit = 0
+        self.NoE = 0
         self.problem = problem
         self.problem_path = problem_path
         self.solve_iter = solve_iter
@@ -89,6 +91,8 @@ class vns_env(gym.Env):
         self.TARGET = BEST_TIME[self.problem]
         self.action_manager.llh_manager.reset(self.problem_path) # 重设底层 LLH
         self.action_manager.set_time_start()
+        self.action_manager.time_limit = self.time_limit
+        self.action_manager.NoE = self.NoE
         # 初始fitness
         self.original_time = self.action_manager.llh_manager.previous_time
         # print(self.best_solution[0])

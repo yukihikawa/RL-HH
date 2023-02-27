@@ -137,7 +137,7 @@ def build_env(env_class=None, env_args: dict = None, gpu_id: int = -1):
 
     for attr_str in ('env_name', 'num_envs', 'max_step', 'state_dim', 'action_dim', 'if_discrete', 'problem', 'problem_path'):
         setattr(env, attr_str, env_args[attr_str])
-    for attr_str in ('problem', 'problem_path', 'llh_set', 'solve_iter', 'train'):
+    for attr_str in ('problem', 'problem_path', 'llh_set', 'solve_iter', 'train', 'time_limit', 'NoE'):
         setattr(env.unwrapped, attr_str, env_args[attr_str])
     return env
 
