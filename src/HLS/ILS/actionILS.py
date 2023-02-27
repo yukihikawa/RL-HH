@@ -42,10 +42,10 @@ class action:
         # 算法开始运行时间
         self.time_start = time.time()
         # 算法运行时间限制,单位为为秒
-        self.time_limit = 80
+        self.time_limit = 160
         self.iter_start = self.time_start
 
-        self.NoE = 20
+        self.NoE = 30
 
     # 设置单次迭代开始时间
     def set_iter_start(self):

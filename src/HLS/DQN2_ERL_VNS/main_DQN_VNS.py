@@ -40,7 +40,7 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
     args.net_dims = (64, 64, 32)  # the middle layer dimension of MultiLayer Perceptron
     args.gpu_id = gpu_id  # the ID of single GPU, -1 means CPU
     args.gamma = 0.95  # discount factor of future rewards
-    args.eval_per_step = int(1e4)
+    args.eval_per_step = int(1e3)
 
     train_agent(args)
 
