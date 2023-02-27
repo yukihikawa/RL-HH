@@ -34,11 +34,11 @@ class LLHSetILS():
         # 用于扰动的 LLH
         self.shake = []
         #添加方法
-        # self.shake.append(self.shakeA)
+        self.shake.append(self.shakeA)
         self.shake.append(self.shakeB)
         self.shake.append(self.shakeC)
         self.shake.append(self.shakeD)
-        # self.shake.append(self.shakeE)
+        self.shake.append(self.shakeE)
         self.shake.append(self.shakeF)
 
 

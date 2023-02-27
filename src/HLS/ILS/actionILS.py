@@ -79,7 +79,8 @@ class action:
         Move_acceptance = self.move_acceptors[self.actions[action][1]]
         # print('move acc: ', Move_acceptance)
         current = time.time()
-        self.llh_manager.refresh_previous_solution()
+        # 刷新上一次的解
+        # self.llh_manager.refresh_previous_solution()
         # print('in execute')
         # print('global best: ', self.llh_manager.best_time,
         #       'previous: ', self.llh_manager.previous_time)
