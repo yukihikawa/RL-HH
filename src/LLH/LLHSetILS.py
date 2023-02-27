@@ -26,6 +26,9 @@ class LLHSetILS():
         self.vnd.append(self.vnd7)
         self.vnd.append(self.vnd8)
         self.vnd.append(self.vnd9)
+        self.vnd.append(self.vnd10)
+        self.vnd.append(self.vnd11)
+        self.vnd.append(self.vnd12)
 
 
         # 用于扰动的 LLH
@@ -241,6 +244,81 @@ class LLHSetILS():
             new_ms = changeMsRandom(machineIdx, new_ms, self.parameters)
         return (new_os, new_ms)
 
+    # 10 工序码局部搜索
+    def vnd10(self, current_solution):
+        (os, ms) = current_solution
+        current_time = timeTaken(current_solution, self.parameters)
+        # 选择一位工序码
+        idx = random.randint(0, len(os) - 1)
+        for i in range(len(os)):
+            newOs = os.copy()
+            k = newOs[idx]
+            newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
+            newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
+            if current_time > timeTaken((newOs, ms), self.parameters):
+                return (newOs, ms)
+        return (os, ms)
+
+    # 11 机器码局部搜索
+    def vnd11(self, current_solution):
+        (os, ms) = current_solution
+        current_time = timeTaken(current_solution, self.parameters)
+        # 获取作业集合
+        jobs = self.parameters['jobs']
+        # 搜索整个机器码序列
+        for idx in range(0, len(ms)):
+            mcLength = 0  # 工具人
+            jobIdx = -1  # 所属工作号
+            for job in jobs:
+                jobIdx += 1
+                if mcLength + len(job) >= idx + 1:
+                    break
+                else:
+                    mcLength += len(job)
+            opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
+            # 开始搜索机器集合
+            for i in range(0, len(jobs[jobIdx][opIdx])):
+                newMs = ms.copy()
+                newMs[idx] = i
+                new_time = timeTaken((os, newMs), self.parameters)
+                if current_time > new_time:
+                    return (os, newMs)
+        return (os, ms)
+
+    # 12 并行局部搜索
+    def vnd12(self, current_solution):
+        (os, ms) = current_solution
+        current_time = timeTaken(current_solution, self.parameters)
+        # 获取作业集合
+        jobs = self.parameters['jobs']
+        # 选择一位工序码
+        idx = random.randint(0, len(os) - 1)
+
+        for i in range(0, len(os)):
+            newOs = os.copy()
+            k = newOs[idx]
+            newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
+            newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
+            # 工序新位置到位
+            # 开始机器码搜索
+            machineIdx = getMachineIdx(i, newOs, self.parameters)
+            mcLength = 0  # 工具人
+            jobIdx = -1  # 所属工作号
+            # 获取作业编号
+            for job in jobs:
+                jobIdx += 1
+                if mcLength + len(job) >= machineIdx + 1:
+                    break
+                else:
+                    mcLength += len(job)
+            opIdx = machineIdx - mcLength
+            for j in range(0, len(jobs[jobIdx][opIdx])):
+                newMs = ms.copy()
+                newMs[machineIdx] = j
+                new_time = timeTaken((newOs, newMs), self.parameters)
+                if current_time > new_time:
+                    return (newOs, newMs)
+        return (os, ms)
 
     # ==========================扰动LLH==============================
 

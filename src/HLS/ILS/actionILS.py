@@ -42,7 +42,7 @@ class action:
         # 算法开始运行时间
         self.time_start = time.time()
         # 算法运行时间限制,单位为为秒
-        self.time_limit = 120
+        self.time_limit = 80
         self.iter_start = self.time_start
 
         self.NoE = 20
@@ -55,6 +55,9 @@ class action:
     def elapsed_iter_time(self):
         return time.time() - self.iter_start
 
+    # 设置总体开始时间
+    def set_time_start(self):
+        self.time_start = time.time()
     # 总体已用时间,单位毫秒
     def elapsed_time(self):
         return time.time() - self.time_start
@@ -77,6 +80,9 @@ class action:
         # print('move acc: ', Move_acceptance)
         current = time.time()
         self.llh_manager.refresh_previous_solution()
+        # print('in execute')
+        # print('global best: ', self.llh_manager.best_time,
+        #       'previous: ', self.llh_manager.previous_time)
         while current < t_expire:
             # print('===========================================')
             # print('current time: ', current, 't_expire: ', t_expire)
