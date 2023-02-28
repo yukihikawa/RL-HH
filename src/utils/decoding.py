@@ -63,7 +63,7 @@ def decode(pb_instance, os, ms):
     ms_s = split_ms(pb_instance, ms) # 每个操作的机器
 
     indexes = [0] * len(ms_s)
-    start_task_cstr = [0] * len(ms_s)
+    start_task_cstr = [0] * len(ms_s) # 每个操作的开始时间约束
 
     # 迭代 OS 获取任务执行顺序
     # MS 获取机器码
@@ -71,7 +71,7 @@ def decode(pb_instance, os, ms):
         index_machine = ms_s[job][indexes[job]]
         machine = o[job][indexes[job]][index_machine]['machine']
         prcTime = o[job][indexes[job]][index_machine]['processingTime']
-        start_cstr = start_task_cstr[job]
+        start_cstr = start_task_cstr[job] # 获取操作的开始时间约束
 
         # 获取操作的第一个可用位置(时间空隙
         start = find_first_available_place(start_cstr, prcTime, machine_operations[machine - 1])
@@ -89,13 +89,16 @@ def decode(pb_instance, os, ms):
 
 def translate_decoded_to_gantt(machine_operations):
     data = {}
-
+    print('in gantt')
     for idx, machine in enumerate(machine_operations):
+        print('machine', idx + 1, ' : ', machine)
         machine_name = "Machine-{}".format(idx + 1)
+        print('machine_name', machine_name)
         operations = []
         for operation in machine:
             operations.append([operation[3], operation[3] + operation[1], operation[0]])
 
         data[machine_name] = operations
+        print(data[machine_name])
 
     return data

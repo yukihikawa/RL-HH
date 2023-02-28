@@ -68,8 +68,37 @@ def timeTaken(os_ms, pb_instance):
             if end > max_d:
                 max_d = end
         max_per_machine.append(max_d)
+    # print(max_per_machine)
+    return max(max_per_machine)
+
+def timeTakenForDecoded(decoded_data):
+    decoded = decoded_data  # 结构化的问题数据集
+    # 每台机器的最大值
+    max_per_machine = []
+    for machine in decoded:
+        max_d = 0
+        for job in machine:  # 遍历机器的所有作业
+            end = job[3] + job[1]
+            if end > max_d:
+                max_d = end
+        max_per_machine.append(max_d)
 
     return max(max_per_machine)
+def get_machine_workload(os_ms, pb_instance, decoded):
+    # (os, ms) = os_ms  # 元组
+    # decoded = decoding.decode(pb_instance, os, ms)  # 结构化的问题数据集
+    total_time = timeTakenForDecoded(decoded)
+    # 每台机器的最大值
+    workload_per_machine = [0] * pb_instance['machinesNb']
+
+    for i in range(len(decoded)):
+
+        time = 0
+        for job in decoded[i]:
+            # print('job', job[0], ' : ', job[1])
+            time += job[1]
+        workload_per_machine[i] = time / total_time
+    return workload_per_machine
 
 # 改变指定机器码序列位置的机器码 已测
 def changeMsRandom(machineIdx, ms, parameters):
