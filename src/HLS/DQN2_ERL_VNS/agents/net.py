@@ -24,7 +24,11 @@ class QNet(nn.Module):  # nn.Module is a standard PyTorch Network
 
     def get_action(self, state):
         if self.explore_rate < torch.rand(1):
-            action = self.net(state).argmax(dim=1, keepdim=True)
+            action = self.net(state) #[1]->[30]
+            action = action.unsqueeze(0)#[1,30]
+            print('action ori :', action)
+            action = action.argmax(dim=1, keepdim=True)
+            print('action argmax:', action)
         else:
             action = torch.randint(self.action_dim, size=(state.shape[0], 1))
         return action
@@ -47,6 +51,7 @@ def build_mlp(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn
         activation = nn.ReLU
     net_list = []
     for i in range(len(dims) - 1):
+        # print("i: ",i)
         net_list.extend([nn.Linear(dims[i], dims[i + 1]), activation()])
     if if_raw_out:
         del net_list[-1]  # delete the activation function of the output layer to keep raw output

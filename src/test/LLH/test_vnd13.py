@@ -1,10 +1,11 @@
+import os
 import random
 
-from src.LLH.LLHSetVNS import LLHSetVNS
-import os
-
-from src.LLH.LLHUtils import get_machine_workload
-from src.utils.decoding import decode, split_ms
+from src.LLH.LLHUtils import get_machine_workload, timeTakenForDecoded, timeTaken
+from src.utils import decoding
+from src.utils.decoding import split_ms, decode
+from src.utils.encoding import initializeResult
+from src.utils.parser import parse
 
 
 def vnd13(parameters, current_solution):
@@ -27,12 +28,12 @@ def vnd13(parameters, current_solution):
     selected_new_machine = 0
     for i in range(len(machine_set)):  # 遍历机器合集
         machine_idx = machine_set[i]['machine']
-        new_load = workload[machine_idx]
+        new_load = workload[machine_idx - 1]
         if new_load < prev_load:
             prev_load = new_load
             selected_new_machine = i  # 新的ms编码
-            print("sdfgsd:", selected_new_machine)
-    print('selected_new_machine ggggg: ', selected_new_machine)
+    #         print("sdfgsd:", selected_new_machine)
+    # print('selected_new_machine ggggg: ', selected_new_machine)
     # 生成新的ms编码
     ms_s = split_ms(parameters, current_solution[1])  # 分离的ms编码
     # 在 ms 中的位置
@@ -45,29 +46,20 @@ def vnd13(parameters, current_solution):
     new_ms[ms_idx] = selected_new_machine
     return (current_solution[0], new_ms)
 
-problem = 'MK09'
+
+problem = 'MK02'
 problem_str = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + problem + ".fjs")
-set = LLHSetVNS()
-# print(set.previous_time)
-set.reset(problem_str)
-# for i in range(0, 50):
-#     # set.reset()
-#     print('ori: ', set.previous_time)
-#     for i in range(0, 100):
-#         # 随机选取 0-4
-#         idx = random.randint(0, 4)
-#         # 执行对应的函数
-#         set.llh[idx]()
-#     print("local optimum: ", set.previous_time)
-#     print('best: ', set.best_time)
-#     # 随机选取 5-7
-#     idx = random.randint(5, 7)
-#     # 执行对应的函数
-#     set.llh[idx]()
-#     print("new: ", set.previous_time)
-for i in range(0, 40):
-    set.reset(problem_str)
-    print('ori: ', set.previous_time)
-    set.heuristicD()
-    print("new: ", set.previous_time)
-    print(' ')
+
+parameters = parse(problem_str)
+solution = initializeResult(parameters)
+for i in range(10):
+    decoded = decoding.decode(parameters, solution[0], solution[1])
+    print('================================================================')
+    print('prevTime:', timeTakenForDecoded(decoded))
+    workload = get_machine_workload(parameters, decoded)
+    print("workload", workload)
+    solution = vnd13(parameters, solution)
+    new_decoded = decoding.decode(parameters, solution[0], solution[1])
+    workload = get_machine_workload(parameters, new_decoded)
+    print("workload", workload)
+    print('newTime:', timeTaken(solution, parameters))

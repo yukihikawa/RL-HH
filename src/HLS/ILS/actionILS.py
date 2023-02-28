@@ -19,9 +19,9 @@ class action:
         self.selectors.append(self.selectorImprovement)
         self.selectors.append(self.selectorAccepted)
         self.selectors.append(self.selectorIOT)
-        self.selectors.append(self.selectorSpeed)
-        self.selectors.append(self.selectorSpeedAccepted)
-        self.selectors.append(self.selectorSpeedNew)
+        # self.selectors.append(self.selectorSpeed)
+        # self.selectors.append(self.selectorSpeedAccepted)
+        # self.selectors.append(self.selectorSpeedNew)
 
         #移动接受方法组
         self.move_acceptors = []

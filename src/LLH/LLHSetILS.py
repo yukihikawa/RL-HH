@@ -2,8 +2,9 @@ import random
 import sys
 import time
 
-from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx
+from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx, get_machine_workload
 from src.utils import encoding
+from src.utils.decoding import decode, split_ms
 from src.utils.parser import parse
 
 # LLH方法类,维护局部搜索和扰动两类 LLH
@@ -17,18 +18,19 @@ class LLHSetILS():
         # 用于 VND 过程的 LLH
         self.vnd = []
         # 添加方法
-        self.vnd.append(self.vnd1)
-        self.vnd.append(self.vnd2)
-        self.vnd.append(self.vnd3)
-        self.vnd.append(self.vnd4)
-        self.vnd.append(self.vnd5)
-        self.vnd.append(self.vnd6)
-        self.vnd.append(self.vnd7)
-        self.vnd.append(self.vnd8)
-        self.vnd.append(self.vnd9)
+        # self.vnd.append(self.vnd1)
+        # self.vnd.append(self.vnd2)
+        # self.vnd.append(self.vnd3)
+        # self.vnd.append(self.vnd4)
+        # self.vnd.append(self.vnd5)
+        # self.vnd.append(self.vnd6)
+        # self.vnd.append(self.vnd7)
+        # self.vnd.append(self.vnd8)
+        # self.vnd.append(self.vnd9)
         self.vnd.append(self.vnd10)
         self.vnd.append(self.vnd11)
         self.vnd.append(self.vnd12)
+        self.vnd.append(self.vnd13)
 
 
         # 用于扰动的 LLH
@@ -103,7 +105,7 @@ class LLHSetILS():
         self.previous_solution = self.best_solution
         self.previous_time = self.best_time
 
-    # 根据被选择的llh序号\运行持续时间\改进量\是否被接受,更新评估数据sja
+    # 根据被选择的llh序号\运行持续时间\改进量\是否被接受,更新评估数据
     def update_evaluation_score(self, shake_idx: int, duration: float, delta_f: int, accepted: bool):
         #更新扰动评估基础数据
         self.total_duration[shake_idx] += duration
@@ -143,6 +145,18 @@ class LLHSetILS():
         (os, ms) = current_solution
         machineIdx = random.randint(0, len(ms) - 1)
         return (os, changeMsRandom(machineIdx, ms, self.parameters))
+
+    # 2-1 多重机器码随机邻域,选中一位机器码,随机改为可用机器集中的其他机器码,若改变后时间更短,则接受
+    def vnd2_1(self, current_solution):
+        G_MAX = 5
+        (os, ms) = current_solution
+        for i in range(G_MAX):
+            new_ms = ms.copy()
+            machineIdx = random.randint(0, len(ms) - 1)
+            new_ms = changeMsRandom(machineIdx, new_ms, self.parameters)
+            new_time = timeTaken((os, new_ms), self.parameters)
+            if self.previous_time > new_time:
+                return (os, new_ms)
 
     # 3 移动单个工序码,并改变其机器码
     def vnd3(self, current_solution):
@@ -319,6 +333,155 @@ class LLHSetILS():
                 if current_time > new_time:
                     return (newOs, newMs)
         return (os, ms)
+
+    # 13 工作负载邻域
+    def vnd13(self, current_solution):
+        # 对当前解进行解码
+        machine_operation = decode(self.parameters, current_solution[0], current_solution[1])
+        # 获取工作负载
+        workload = get_machine_workload(self.parameters, machine_operation)
+        # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+        max_workload_machine = workload.index(max(workload))
+        # 从具有最大负载的机器中随机选择一个工序
+        selected_op = random.choice(machine_operation[max_workload_machine])
+        # 获取工序信息
+        job_idx, op_idx = map(int, selected_op[0].split('-'))
+        op_idx -= 1
+        # 获取工序的机器集合
+        machine_set = self.parameters['jobs'][job_idx][op_idx]
+        # 当前工序所在机器负载
+        prev_load = max(workload)
+        # 从机器集合中选择负载最小的机器
+        selected_new_machine = 0
+        for i in range(len(machine_set)):  # 遍历机器合集
+            machine_idx = machine_set[i]['machine']
+            new_load = workload[machine_idx - 1]
+            if new_load < prev_load:
+                prev_load = new_load
+                selected_new_machine = i  # 新的ms编码
+        #         print("sdfgsd:", selected_new_machine)
+        # print('selected_new_machine ggggg: ', selected_new_machine)
+        # 生成新的ms编码
+        ms_s = split_ms(self.parameters, current_solution[1])  # 分离的ms编码
+        # 在 ms 中的位置
+        ms_idx = 0
+        for i in range(job_idx):
+            ms_idx += len(ms_s[i])
+        ms_idx += op_idx
+        new_ms = current_solution[1].copy()
+        # print('old ms: ', new_ms[ms_idx])
+        new_ms[ms_idx] = selected_new_machine
+        return (current_solution[0], new_ms)
+
+    # 13.1 工作负载局部搜索
+    def vnd13_1(self, current_solution):
+        G_MAX = 3
+        (os, ms) = current_solution
+        new_os = os.copy()
+        new_ms = ms.copy()
+        for i in range(G_MAX):
+            # 对当前解进行解码
+            machine_operation = decode(self.parameters, current_solution[0], current_solution[1])
+            # 获取工作负载
+            workload = get_machine_workload(self.parameters, machine_operation)
+            # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+            max_workload_machine = workload.index(max(workload))
+            # 从具有最大负载的机器中随机选择一个工序
+            selected_op = random.choice(machine_operation[max_workload_machine])
+            # 获取工序信息
+            job_idx, op_idx = map(int, selected_op[0].split('-'))
+            op_idx -= 1
+            # 获取工序的机器集合
+            machine_set = self.parameters['jobs'][job_idx][op_idx]
+            # 当前工序所在机器负载
+            prev_load = max(workload)
+            # 从机器集合中选择负载最小的机器
+            selected_new_machine = 0
+            for i in range(len(machine_set)):  # 遍历机器合集
+                machine_idx = machine_set[i]['machine']
+                new_load = workload[machine_idx - 1]
+                if new_load < prev_load:
+                    prev_load = new_load
+                    selected_new_machine = i  # 新的ms编码
+            #         print("sdfgsd:", selected_new_machine)
+            # print('selected_new_machine ggggg: ', selected_new_machine)
+            # 生成新的ms编码
+            ms_s = split_ms(self.parameters, current_solution[1])  # 分离的ms编码
+            # 在 ms 中的位置
+            ms_idx = 0
+            for i in range(job_idx):
+                ms_idx += len(ms_s[i])
+            ms_idx += op_idx
+            new_ms = current_solution[1].copy()
+            # print('old ms: ', new_ms[ms_idx])
+            new_ms[ms_idx] = selected_new_machine
+        return (new_os, new_ms)
+
+    # 14 多重 swap 移动
+    def vnd14(self, current_solution):
+        G_max = 3
+        (os, ms) = current_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+        return (new_os, ms)
+    def vnd14_1(self, current_solution):
+        G_max = 5
+        (os, ms) = current_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+        return (new_os, ms)
+
+    # 15 作业交换移动
+    def vnd15(self, current_solution):
+        (os, ms) = current_solution
+        jobs = self.parameters['jobs']
+        # 选择两个不同的作业
+        job1 = job2 =  random.randint(0, len(jobs) - 1)
+        while job1 == job2:
+            job2 = random.randint(0, len(jobs) - 1)
+        idx1 = idx2 = 0
+        while idx1 < len(os) and idx2 < len(os):
+            while idx1 < len(os) and os[idx1] != job1:
+                idx1 += 1
+            while idx2 < len(os) and os[idx2] != job2:
+                idx2 += 1
+            if idx1 < len(os) and idx2 < len(os) and os[idx1] == job1 and os[idx2] == job2:
+                os[idx1], os[idx2] = os[idx2], os[idx1]
+            idx1 += 1
+            idx2 += 1
+        return (os, ms)
+
+    # 16 最早可加工机器
+    def vnd16(self, current_solution):
+        (os, ms) = current_solution
+        new_ms = ms.copy()
+        # 获取工序信息
+        decoded = decode(self.parameters, os, ms)
+        op_ms_idx = random.randint(1, len(decoded) - 1)
+        machine_idx = ms[op_ms_idx]
+        prev_machine_idx = ms[op_ms_idx - 1]
+        # 获取机器的工序
+        o = self.parameters['jobs']  # 取出操作列表
+        machine_operations = [[] for i in range(self.parameters['machinesNb'])]  # 生成一个包含所有机器序号的列表
+
+        ms_s = split_ms(self.parameters, ms)  # 每个操作的机器
+
+        indexes = [0] * len(ms_s)
+        start_task_cstr = [0] * len(ms_s)  # 每个操作的开始时间约束
+
+
+
+
 
     # ==========================扰动LLH==============================
 
