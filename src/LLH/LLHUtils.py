@@ -71,6 +71,7 @@ def timeTaken(os_ms, pb_instance):
     # print(max_per_machine)
     return max(max_per_machine)
 
+# 使用已传入的解码数据计算时间
 def timeTakenForDecoded(decoded_data):
     decoded = decoded_data  # 结构化的问题数据集
     # 每台机器的最大值
@@ -84,16 +85,18 @@ def timeTakenForDecoded(decoded_data):
         max_per_machine.append(max_d)
 
     return max(max_per_machine)
-def get_machine_workload(os_ms, pb_instance, decoded):
+
+# 使用传入的解码数据计算工作负载
+def get_machine_workload(pb_instance, decoded):
     # (os, ms) = os_ms  # 元组
     # decoded = decoding.decode(pb_instance, os, ms)  # 结构化的问题数据集
     total_time = timeTakenForDecoded(decoded)
-    # 每台机器的最大值
+    # 每台机器的负载
     workload_per_machine = [0] * pb_instance['machinesNb']
 
     for i in range(len(decoded)):
-
         time = 0
+        # 计算该机器的工作总量
         for job in decoded[i]:
             # print('job', job[0], ' : ', job[1])
             time += job[1]

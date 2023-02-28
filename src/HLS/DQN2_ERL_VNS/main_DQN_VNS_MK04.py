@@ -34,7 +34,7 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'solve_iter': SOLVE_ITER,
         'train': True,
         'time_limit': 160,
-        'NoE': 80,
+        'NoE': 40,
     }
     #get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 

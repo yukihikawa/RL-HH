@@ -51,13 +51,27 @@ class AgentDQN(AgentBase):  # [ElegantRL.2022.04.18]
         dones = torch.zeros((horizon_len, self.num_envs), dtype=torch.bool).to(self.device)
 
         state = self.last_state  # last_state.shape = (state_dim, ) for a single env.
+        # print('sus state:', state)
         get_action = self.act.get_action
         for t in range(horizon_len):
-            action = torch.randint(self.action_dim, size=(1, 1)) if if_random \
-                else get_action(state.unsqueeze(0))  # different
+            # print('random? ', if_random)
+            if if_random:
+                action = torch.randint(self.action_dim, size=(1, 1))
+            else:
+                # if state.shape == ():
+                #     state = state.unsqueeze(0)
+                action = get_action(state) # state : [1]
+            # action = torch.randint(self.action_dim, size=(1, 1)) if if_random \
+            #     else get_action(state.unsqueeze(0))  # different
             states[t] = state
 
-            ary_action = action[0, 0].detach().cpu().numpy()
+            ary_action = action[0,0].detach().cpu().numpy() # 1 * 1
+            # print(type(ary_action))
+            # print('shape: ', ary_action.shape)
+            if ary_action.shape != ():
+                print(ary_action)
+            # print(type(ary_action))
+            # print("action explore: ", ary_action)
             ary_state, reward, done, _ = env.step(ary_action)  # next_state
             state = torch.as_tensor(env.reset() if done else ary_state, dtype=torch.float32, device=self.device)
             actions[t] = action

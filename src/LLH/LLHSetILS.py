@@ -2,8 +2,9 @@ import random
 import sys
 import time
 
-from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx
+from src.LLH.LLHUtils import timeTaken, changeMsRandom, getMachineIdx, get_machine_workload
 from src.utils import encoding
+from src.utils.decoding import decode, split_ms
 from src.utils.parser import parse
 
 # LLH方法类,维护局部搜索和扰动两类 LLH
@@ -17,18 +18,19 @@ class LLHSetILS():
         # 用于 VND 过程的 LLH
         self.vnd = []
         # 添加方法
-        self.vnd.append(self.vnd1)
-        self.vnd.append(self.vnd2)
-        self.vnd.append(self.vnd3)
-        self.vnd.append(self.vnd4)
-        self.vnd.append(self.vnd5)
-        self.vnd.append(self.vnd6)
-        self.vnd.append(self.vnd7)
-        self.vnd.append(self.vnd8)
-        self.vnd.append(self.vnd9)
+        # self.vnd.append(self.vnd1)
+        # self.vnd.append(self.vnd2)
+        # self.vnd.append(self.vnd3)
+        # self.vnd.append(self.vnd4)
+        # self.vnd.append(self.vnd5)
+        # self.vnd.append(self.vnd6)
+        # self.vnd.append(self.vnd7)
+        # self.vnd.append(self.vnd8)
+        # self.vnd.append(self.vnd9)
         self.vnd.append(self.vnd10)
         self.vnd.append(self.vnd11)
         self.vnd.append(self.vnd12)
+        self.vnd.append(self.vnd13)
 
 
         # 用于扰动的 LLH
@@ -319,6 +321,47 @@ class LLHSetILS():
                 if current_time > new_time:
                     return (newOs, newMs)
         return (os, ms)
+
+    # 13 工作负载邻域
+    def vnd13(self, current_solution):
+        # 对当前解进行解码
+        machine_operation = decode(self.parameters, current_solution[0], current_solution[1])
+        # 获取工作负载
+        workload = get_machine_workload(self.parameters, machine_operation)
+        # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+        max_workload_machine = workload.index(max(workload))
+        # 从具有最大负载的机器中随机选择一个工序
+        selected_op = random.choice(machine_operation[max_workload_machine])
+        # 获取工序信息
+        job_idx, op_idx = map(int, selected_op[0].split('-'))
+        op_idx -= 1
+        # 获取工序的机器集合
+        machine_set = self.parameters['jobs'][job_idx][op_idx]
+        # 当前工序所在机器负载
+        prev_load = max(workload)
+        # 从机器集合中选择负载最小的机器
+        selected_new_machine = 0
+        for i in range(len(machine_set)):  # 遍历机器合集
+            machine_idx = machine_set[i]['machine']
+            new_load = workload[machine_idx - 1]
+            if new_load < prev_load:
+                prev_load = new_load
+                selected_new_machine = i  # 新的ms编码
+        #         print("sdfgsd:", selected_new_machine)
+        # print('selected_new_machine ggggg: ', selected_new_machine)
+        # 生成新的ms编码
+        ms_s = split_ms(self.parameters, current_solution[1])  # 分离的ms编码
+        # 在 ms 中的位置
+        ms_idx = 0
+        for i in range(job_idx):
+            ms_idx += len(ms_s[i])
+        ms_idx += op_idx
+        new_ms = current_solution[1].copy()
+        # print('old ms: ', new_ms[ms_idx])
+        new_ms[ms_idx] = selected_new_machine
+        return (current_solution[0], new_ms)
+
+
 
     # ==========================扰动LLH==============================
 

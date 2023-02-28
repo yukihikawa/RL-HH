@@ -2,6 +2,7 @@ import math
 import random
 
 import gym
+import numpy
 import numpy as np
 from gym import spaces
 
@@ -33,12 +34,19 @@ class vns_env(gym.Env):
         self.action_space = spaces.Discrete(len(self.actions))
 
         # 定义状态空间,维度为 1,取值范围 0-1
-        # self.observation_space = spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32)
-        low = np.array([0.0, ])
-        high = np.array([1.0, ])
-        self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
+        self.observation_space = spaces.Box(low=-float('inf'), high=float('inf'), shape=(1,), dtype=np.float32)
+        # low = np.array([0.0, ])
+        # high = np.array([1.0, ])
+        # self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
     def step(self, action):
+        # print(action)
+        # print(type(action))
+
+        # if isinstance(action, np.ndarray):
+        #     action_c = action[0]
+        # else:
+        #     action_c = action
         action_c = action
         print("stage: ", self.STAGE, 'global best: ', self.action_manager.llh_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.llh_manager.previous_time)
 
@@ -57,11 +65,14 @@ class vns_env(gym.Env):
         self.STAGE += 1
         # 状态norm( f ) = f /Avg( fnew)
         s_ = self.action_manager.llh_manager.previous_time / (self.total_fitness / self.STAGE)
+        if s_ > 1:
+            s_ = 1
+
 
         if termination:
             self.render()
             return s_, reward, termination, {'bestTime': self.action_manager.llh_manager.best_time}
-        return s_, reward, termination, {}
+        return np.array([s_,]), reward, termination, {}
 
     # 奖励函数
     def reward(self, prev_global_best):
