@@ -2,7 +2,7 @@ import os
 import time
 import torch.nn
 import numpy as np
-from torch import Tensor
+from torch import Tensor, nn
 
 from src.HLS.DQN2_ERL_VNS.train.config import Config
 
@@ -173,6 +173,8 @@ def get_rewards_and_steps(env, actor, if_render: bool = False) -> (float, int):
     for steps in range(max_step):
         tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         tensor_action = actor(tensor_state)
+        m = nn.Softmax(dim=1)
+        tensor_action = m(tensor_action)
         # 直接将 tensor 送入 reward
         # print("tensor_action", tensor_action)
         # if if_discrete:
@@ -221,10 +223,16 @@ def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, 
     for steps in range(max_step):
         tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         tensor_action = actor(tensor_state)
-        if if_discrete:
-            tensor_action = tensor_action.argmax(dim=1)
-        action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
-        state, reward, done, result = env.step(action)
+        m = nn.Softmax(dim=1)
+        tensor_action = m(tensor_action)
+        # 直接将 tensor 送入 reward
+        # print("tensor_action", tensor_action)
+        # if if_discrete:
+        #     tensor_action = tensor_action.argmax(dim=1)
+        # action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
+
+        # state, reward, done, _ = env.step(action)
+        state, reward, done, result = env.step(tensor_action)
         returns += reward
 
         if if_render:
@@ -300,7 +308,7 @@ def draw_learning_curve(recorder: np.ndarray = None,
 
     '''plot subplots'''
     import matplotlib as mpl
-    mpl.use('Agg')
+    # mpl.use('Agg')
     """Generating matplotlib graphs without a running X server [duplicate]
     write `mpl.use('Agg')` before `import matplotlib.pyplot as plt`
     https://stackoverflow.com/a/4935945/9293137

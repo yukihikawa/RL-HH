@@ -18,11 +18,11 @@ PROBLEM = 'MK06'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS'
 SOLVE_ITER = 2000
-RENDER_TIMES = 5
+RENDER_TIMES = 1
 # ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS1_646432_FINE_19114.666"
 # MODULE = '/actor__000000020992_19114.666.pt'
-ACTOR_PATH = f"./vns_env-v0_DQN_0_MK02_VNS1"
-MODULE = '/actor__000000154112_11710.667.pt'
+ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS1"
+MODULE = '/actor__000000072192.pt'
 STATE = 'cla'
 REWARD = 'simple'
 
