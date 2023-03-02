@@ -6,6 +6,7 @@ import torch
 
 from src.HLS.DQN2_ERL_VNS.train.evaluator import get_rewards_and_steps, get_rewards_and_steps_solve
 from src.LLH.LLHSetVNS import LLHSetVNS
+from src.LLH.LLHSetVNS2 import LLHSetVNS2
 from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN
@@ -16,20 +17,22 @@ gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK06'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-LLH_SET = 'VNS'
+LLH_SET = 'VNS2'
 SOLVE_ITER = 2000
 RENDER_TIMES = 5
 # ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS1_646432_FINE_19114.666"
 # MODULE = '/actor__000000020992_19114.666.pt'
-ACTOR_PATH = f"./vns_env-v0_DQN_0_MK02_VNS1"
-MODULE = '/actor__000000154112_11710.667.pt'
+# ACTOR_PATH = f"./vns_env-v0_DQN_0_MK02_VNS1"
+# MODULE = '/actor__000000154112_11710.667.pt'
+ACTOR_PATH = f"./vns_env-v0_DQN_0_MK04_VNS2"
+MODULE = '/actor__000000072192_21670.000.pt'
 STATE = 'cla'
 REWARD = 'simple'
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm
     env_class = gym.make
-    holder = LLHSetVNS(PROBLEM_PATH)
+    holder = LLHSetVNS2(PROBLEM_PATH)
     env_args = {
         'env_name': 'vns_env-v0',  # A pole is attached by an un-actuated joint to a cart.
         # Reward: keep the pole upright, a reward of `+1` for every step taken

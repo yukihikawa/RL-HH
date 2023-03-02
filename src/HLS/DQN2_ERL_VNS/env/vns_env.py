@@ -9,6 +9,7 @@ import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
 from src.HLS.DQN2_ERL_VNS.train import config
 from src.LLH.LLHSetVNS import LLHSetVNS
+from src.LLH.LLHSetVNS2 import LLHSetVNS2
 from src.LLH.LLHolder import LLHolder
 from src.utils import parser
 
@@ -23,7 +24,7 @@ class vns_env(gym.Env):
         self.problem = problem
         self.problem_path = problem_path
         self.solve_iter = solve_iter
-        self.vns = LLHSetVNS()
+        self.vns = LLHSetVNS2()
         self.heuristics = self.vns.llh
         # 定义动作空间, LLH方法数量
         self.action_space = spaces.Discrete(len(self.heuristics))

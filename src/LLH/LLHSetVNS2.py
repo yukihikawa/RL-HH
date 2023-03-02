@@ -1,25 +1,35 @@
 import random
 
-from src.LLH.LLHUtils import timeTaken, getMachineIdx, changeMsRandom
+from src.LLH.LLHUtils import timeTaken, getMachineIdx, changeMsRandom, get_machine_workload
 from src.utils import encoding
+from src.utils.decoding import decode, split_ms
 from src.utils.parser import parse
 
 
-class LLHSetVNS():
-    # 初始化
+class LLHSetVNS2():
     def __init__(self, train = False):
-        # 是否为训练环境
+        # solutions
+        # self.solution_population = []
+        # self.solution_population_time = []
         self.train = train
+        # if self.train:
+        #     self.best_solution = self.previous_solution = encoding.initializeFixedResult(self.parameters)
+        # else:
+        #     self.best_solution = self.previous_solution = encoding.initializeResult(self.parameters)
+        # self.best_time = self.previous_time = timeTaken(self.previous_solution, self.parameters)
+        # print('prev:', self.previous_time)
+
 
         #llh
         self.llh = []
         # 添加所有函数到 llh
         self.llh.append(self.heuristic1)
-        self.llh.append(self.heuristic2A)
-        self.llh.append(self.heuristic3A)
+        self.llh.append(self.heuristic2)
+        self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic4)
         self.llh.append(self.heuristic5)
         self.llh.append(self.heuristic6)
+        self.llh.append(self.vnd13)
         # self.llh.append(self.heuristicA)
         self.llh.append(self.heuristicB)
         # self.llh.append(self.heuristicC)
@@ -27,16 +37,14 @@ class LLHSetVNS():
         self.llh.append(self.heuristicE)
         self.llh.append(self.heuristicF)
 
-
-
-    # 工具方法=======================================
-    # 更新最优解
+    # 工具方法,更新最优解
     def update_best_solution(self):
         if self.best_time > self.previous_time:
             self.best_solution = self.previous_solution
             self.best_time = self.previous_time
 
-    # 环境重设
+
+    # 重设
     def reset(self, problem_path):
         self.parameters = parse(problem_path)
 
@@ -46,45 +54,37 @@ class LLHSetVNS():
             self.best_solution = self.previous_solution = encoding.initializeResult(self.parameters)
         self.previous_time = self.best_time = timeTaken(self.previous_solution, self.parameters)
 
-    # 区别接受包装器
-    def accept_wrapper(self, llh_call):
-        new_solution, new_time = self.llh[llh_call]()
-        # 当前解更新策略
-        # VND LLH: 接受改进
-        if llh_call in [0, 1, 2, 3, 4]:
-            if new_time < self.previous_time:
-                self.previous_solution = new_solution
-                self.previous_time = new_time
-        # SHAKING LLH: 直接接受
-        else:
-            self.previous_solution = new_solution
-            self.previous_time = new_time
-        # 最优解更新策略
-        self.update_best_solution()
-
-
 
 
     # VND==============================================
-    # 工序码局部搜索, 改写完成
+    # 工序码局部搜索,返回值为 previous_time 改写完成
     def heuristic1(self):
-        (os, ms) = self.previous_solution
-        idx = random.randint(0, len(os) - 1)
-        for i in range(0, len(os)):
-            newOs = os.copy()
+
+        idx = random.randint(0, len(self.previous_solution[0]) - 1)
+
+        for i in range(0, len(self.previous_solution[0])):
+            newOs = self.previous_solution[0].copy()
             k = newOs[idx]
             newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
             newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
-            new_time = timeTaken((newOs, ms), self.parameters)
+            # 有优化即结束
+            new_time = timeTaken((newOs, self.previous_solution[1]), self.parameters)
             if self.previous_time > new_time:
-                return (newOs, ms), new_time
-        return (os, ms), self.previous_time
+                self.previous_solution = (newOs, self.previous_solution[1])
+                self.previous_time = new_time
+                self.update_best_solution()
+                return
 
-    # 机器码局部搜索，全搜一遍,返回新解与时间
+    # 机器码局部搜索，全搜一遍,返回 previous_time 改写完成
     def heuristic2(self):
-        (os, ms) = self.previous_solution
+        # self.check_tabu(os_ms)
+        # 获取作业集合
         jobs = self.parameters['jobs']
-        for idx in range(0, len(ms)):
+        # idx = self.get_randon_zero_index(self.ms_tabu)
+        # idx = random.randint(0, len(ms) - 1)
+        # self.ms_tabu[idx] = 1
+        # 搜索整个机器码序列
+        for idx in range(0, len(self.previous_solution[1])):
             mcLength = 0  # 工具人
             jobIdx = -1  # 所属工作号
             for job in jobs:
@@ -96,34 +96,28 @@ class LLHSetVNS():
             opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
             # 开始搜索机器集合
             for i in range(0, len(jobs[jobIdx][opIdx])):
-                newMs = ms.copy()
+                newMs = self.previous_solution[1].copy()
                 newMs[idx] = i
-                new_time = timeTaken((os, newMs), self.parameters)
+                new_time = timeTaken((self.previous_solution[0], newMs), self.parameters)
                 if self.previous_time > new_time:
-                    return (os, newMs), new_time
-        return (os, ms), self.previous_time
+                    self.previous_solution = (self.previous_solution[0], newMs)
+                    self.previous_time = new_time
+                    break
+        self.update_best_solution()
 
-    # 机器码局部搜索,随机替换
-    def heuristic2A(self):
-        (os, ms) = self.previous_solution
-        tms = ms.copy()
-        t_time = self.previous_time
-        for i in range(0, len(tms)):
-            newMs = changeMsRandom(i, tms, self.parameters)
-            new_time = timeTaken((os, newMs), self.parameters)
-            if self.previous_time > new_time:
-                tms, t_time = newMs, new_time
-        return (os, tms), t_time
-
-    # 并行局部搜索,搜索 OS, 搜索 MS 改进在此
+    # 并行局部搜索 改进在此
     def heuristic3(self):
-        (os, ms) = self.previous_solution
+        # self.check_tabu(os_ms)
+
         # 获取作业集合
         jobs = self.parameters['jobs']
-        idx = random.randint(0, len(os) - 1)
+        # print(tos)
+        idx = random.randint(0, len(self.previous_solution[0]) - 1)
+        # idx = self.get_randon_zero_index(self.os_tabu2)
+        # self.os_tabu2[idx] = 1
         # 获取作业编号
-        for i in range(0, len(os)):
-            newOs = os.copy()
+        for i in range(0, len(self.previous_solution[0])):
+            newOs = self.previous_solution[0].copy()
             k = newOs[idx]
             newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
             newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
@@ -138,89 +132,107 @@ class LLHSetVNS():
                     break
                 else:
                     mcLength += len(job)
-            # 作业内部的工序号
             opIdx = machineIdx - mcLength
             for j in range(0, len(jobs[jobIdx][opIdx])):
                 newMs = self.previous_solution[1].copy()
                 newMs[machineIdx] = j
                 new_time = timeTaken((newOs, newMs), self.parameters)
                 if self.previous_time > new_time:
-                    return (newOs, newMs), new_time
-        return (os, ms), self.previous_time
-
-    # 搜索 OS,随机改变对应位置机器码
-    def heuristic3A(self):
-        (os, ms) = self.previous_solution
-        tos = os.copy()
-        tms = ms.copy()
-        t_time = self.previous_time
-        # print(tos)
-        idx = random.randint(0, len(tos) - 1)
-
-        # print('selected position: ', idx)
-        for i in range(0, len(tos)):
-            newOs = tos.copy()
-            k = newOs[idx]
-            newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
-            newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
-            machineIdx = getMachineIdx(i, os, self.parameters)
-            newMs = changeMsRandom(machineIdx, ms, self.parameters)
-            # print(newOs)
-            new_time = timeTaken((newOs, newMs), self.parameters)
-            if self.previous_time > new_time:
-                tos = newOs
-                tms = newMs
-                t_time = new_time
-        return (tos, tms), t_time
+                    self.previous_solution = (newOs, newMs)
+                    self.previous_time = new_time
+                    break
+        self.update_best_solution()
 
     # 10. 随机前移工序码子序列, 并改变对应位置的机器码
     def heuristic4(self):
-        (os, ms) = self.previous_solution
-        ida = idb = random.randint(0, len(os) - 2)
+        ida = idb = random.randint(0, len(self.previous_solution[0]) - 2)
         while ida == idb:
-            idb = random.randint(0, len(os) - 1)
+            idb = random.randint(0, len(self.previous_solution[0]) - 1)
         if ida > idb:
             ida, idb = idb, ida
-        newOs = os.copy()
-        newOs = newOs[ida:idb + 1] + newOs[:ida] + newOs[idb + 1:]
-        newMs = ms.copy()
+        newOs = self.previous_solution[0][ida:idb + 1] + self.previous_solution[0][:ida] + self.previous_solution[0][idb + 1:]
+        newMs = self.previous_solution[1].copy()
         for i in range(0, idb - ida + 1):
             newMs = changeMsRandom(i, newMs, self.parameters)
         new_time = timeTaken((newOs, newMs), self.parameters)
         if self.previous_time > new_time:
-            return (newOs, newMs), new_time
-        return (os, ms), self.previous_time
+            self.previous_solution = (newOs, newMs)
+            self.previous_time = new_time
+            self.update_best_solution()
 
     # 5. 随机改变单个机器码
     def heuristic5(self):
-        (os, ms) = self.previous_solution
-        machineIdx = random.randint(0, len(ms) - 1)
+        machineIdx = random.randint(0, len(self.previous_solution[1]) - 1)
         # ('selected idx : ', machineIdx)
-        newMs = changeMsRandom(machineIdx, ms, self.parameters)
-        new_time = timeTaken((os, newMs), self.parameters)
+        newMs = changeMsRandom(machineIdx, self.previous_solution[1], self.parameters)
+        new_time = timeTaken((self.previous_solution[0], newMs), self.parameters)
         if self.previous_time > new_time:
-            return (os, newMs), new_time
-        return (os, ms), self.previous_time
+            self.previous_solution = (self.previous_solution[0], newMs)
+            self.previous_time = new_time
+            self.update_best_solution()
 
     # 9. 工序码随机反转子序列并同时随机改变对应位置机器码 已测
     def heuristic6(self):
-        (os, ms) = self.previous_solution
-        ida = idb = random.randint(0, len(os) - 2)
+        ida = idb = random.randint(0, len(self.previous_solution[0]) - 2)
         while ida == idb:
-            idb = random.randint(0, len(os) - 1)
+            idb = random.randint(0, len(self.previous_solution[0]) - 1)
         if ida > idb:
             ida, idb = idb, ida
-        rev = os[ida:idb + 1]
+        rev = self.previous_solution[0][ida:idb + 1]
         rev.reverse()
-        newOs = os[:ida] + rev + os[idb + 1:]
-        newMs = ms.copy()
+        newOs = self.previous_solution[0][:ida] + rev + self.previous_solution[0][idb + 1:]
+        newMs = self.previous_solution[1].copy()
         for i in range(ida, idb + 1):
             # print('place: ', i)
             newMs = changeMsRandom(i, newMs, self.parameters)
         new_time = timeTaken((newOs, newMs), self.parameters)
         if self.previous_time > new_time:
-            return (newOs, newMs), new_time
-        return (os, ms), self.previous_time
+            self.previous_solution = (newOs, newMs)
+            self.previous_time = new_time
+            self.update_best_solution()
+
+    def vnd13(self):
+
+        # 对当前解进行解码
+        machine_operation = decode(self.parameters, self.previous_solution[0], self.previous_solution[1])
+        # 获取工作负载
+        workload = get_machine_workload(self.parameters, machine_operation)
+        # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+        max_workload_machine = workload.index(max(workload))
+        # 从具有最大负载的机器中随机选择一个工序
+        selected_op = random.choice(machine_operation[max_workload_machine])
+        # 获取工序信息
+        job_idx, op_idx = map(int, selected_op[0].split('-'))
+        op_idx -= 1
+        # 获取工序的机器集合
+        machine_set = self.parameters['jobs'][job_idx][op_idx]
+        # 当前工序所在机器负载
+        prev_load = max(workload)
+        # 从机器集合中选择负载最小的机器
+        selected_new_machine = 0
+        for i in range(len(machine_set)):  # 遍历机器合集
+            machine_idx = machine_set[i]['machine']
+            new_load = workload[machine_idx - 1]
+            if new_load < prev_load:
+                prev_load = new_load
+                selected_new_machine = i  # 新的ms编码
+        #         print("sdfgsd:", selected_new_machine)
+        # print('selected_new_machine ggggg: ', selected_new_machine)
+        # 生成新的ms编码
+        ms_s = split_ms(self.parameters, self.previous_solution[1])  # 分离的ms编码
+        # 在 ms 中的位置
+        ms_idx = 0
+        for i in range(job_idx):
+            ms_idx += len(ms_s[i])
+        ms_idx += op_idx
+        new_ms = self.previous_solution[1].copy()
+        # print('old ms: ', new_ms[ms_idx])
+        new_ms[ms_idx] = selected_new_machine
+        new_time = timeTaken((self.previous_solution[0], new_ms), self.parameters)
+        if self.previous_time > new_time:
+            self.previous_solution = (self.previous_solution[0], new_ms)
+            self.previous_time = new_time
+            self.update_best_solution()
 
 
 
@@ -237,7 +249,8 @@ class LLHSetVNS():
         for i in range(0, idb - ida + 1):
             newMs = changeMsRandom(i, newMs, self.parameters)
         new_time = timeTaken((os, newMs), self.parameters)
-        return (os, newMs), new_time
+        self.previous_solution = (os, newMs)
+        self.previous_time = new_time
 
     # 随机工序码区间破坏
     def heuristicB(self):
@@ -254,7 +267,8 @@ class LLHSetVNS():
         newOs = os[:ida] + mid + os[idb + 1:]
         # 替换当前解
         new_time = timeTaken((newOs, ms), self.parameters)
-        return (newOs, ms), new_time
+        self.previous_solution = (newOs, ms)
+        self.previous_time = new_time
 
     # 并行区间破坏
     def heuristicC(self):
@@ -277,7 +291,8 @@ class LLHSetVNS():
             newMs = changeMsRandom(machineIdx, newMs, self.parameters)
         # 替换当前解,跳出邻域
         new_time = timeTaken((newOs, newMs), self.parameters)
-        return (newOs, newMs), new_time
+        self.previous_solution = (newOs, newMs)
+        self.previous_time = new_time
 
     # 小邻域结构==============================
 
@@ -303,8 +318,13 @@ class LLHSetVNS():
 
             # 替换当前解,跳出邻域
             new_time = timeTaken((newOs, newMs), self.parameters)
-
-            return (newOs, newMs), new_time
+            # if new_time != self.previous_time:
+            #     self.previous_solution = (newOs, newMs)
+            #     self.previous_time = new_time
+            #     return
+            self.previous_solution = (newOs, newMs)
+            self.previous_time = new_time
+            return
 
     # 5. 随机改变单个机器码 已测
     def heuristicE(self):
@@ -319,7 +339,9 @@ class LLHSetVNS():
             #     self.previous_solution = (os, newMs)
             #     self.previous_time = new_Time
             #     return
-            return (os, newMs), new_Time
+            self.previous_solution = (os, newMs)
+            self.previous_time = new_Time
+            return
 
 
     # 1. 随机交换两个工序码, 返回新的工序码 已测
@@ -340,16 +362,6 @@ class LLHSetVNS():
             #     self.previous_solution = (newOs, ms)
             #     self.previous_time = new_time
             #     return
-            return (newOs, ms), new_time
-
-    def heuristicG(self):
-        # 选择操作区间
-        (os, ms) = self.previous_solution
-        ida = idb = random.randint(0, len(os) - 2)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-        if ida > idb:
-            ida, idb = idb, ida
-
-        newOs = os.copy()
-
+            self.previous_solution = (newOs, ms)
+            self.previous_time = new_time
+            return
