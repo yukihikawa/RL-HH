@@ -1,7 +1,7 @@
 import torch
 from typing import Tuple
 from copy import deepcopy
-from torch import Tensor
+from torch import Tensor, nn
 
 from src.HLS.DQN2_ERL_VNS.agents.AgentBase import AgentBase
 from src.HLS.DQN2_ERL_VNS.agents.net import QNet
@@ -26,6 +26,7 @@ class AgentDQN(AgentBase):  # [ElegantRL.2022.04.18]
         self.act_class = getattr(self, "act_class", QNet)
         self.cri_class = None  # means `self.cri = self.act`
         super().__init__(net_dims=net_dims, state_dim=state_dim, action_dim=action_dim, gpu_id=gpu_id, args=args)
+
         self.act_target = self.cri_target = deepcopy(self.act)
 
         self.act.explore_rate = getattr(args, "explore_rate", 0.25)
@@ -53,14 +54,25 @@ class AgentDQN(AgentBase):  # [ElegantRL.2022.04.18]
         state = self.last_state  # last_state.shape = (state_dim, ) for a single env.
         get_action = self.act.get_action
         for t in range(horizon_len):
-            action = torch.randint(self.action_dim, size=(1, 1)) if if_random \
+            # if if_random:
+            #     print('=random explore=')
+            # else:
+            #     print('======================by net================================')
+            # action = torch.randint(self.action_dim, size=(1, 1)) if if_random \
+            #     else get_action(state.unsqueeze(0)).argmax(dim=1, keepdim=True)  # different
+            m = nn.Softmax(dim=1)
+            # print('explore state', state.shape[0])
+            action = m(torch.randn(1, self.action_dim)) if if_random \
                 else get_action(state.unsqueeze(0))  # different
+            # print('explore action', action)
             states[t] = state
 
-            ary_action = action[0, 0].detach().cpu().numpy()
+            # ary_action = action[0, 0].detach().cpu().numpy()
+            ary_action = action
+            # print('explore action', ary_action,'rand:', if_random)
             ary_state, reward, done, _ = env.step(ary_action)  # next_state
             state = torch.as_tensor(env.reset() if done else ary_state, dtype=torch.float32, device=self.device)
-            actions[t] = action
+            actions[t] = action.argmax(dim=1, keepdim=True)
             rewards[t] = reward
             dones[t] = done
 

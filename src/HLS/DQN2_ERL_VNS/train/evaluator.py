@@ -148,7 +148,7 @@ class Evaluator:
 
 """util"""
 
-
+# 修改过的 action
 def get_rewards_and_steps(env, actor, if_render: bool = False) -> (float, int):
     """Usage
     eval_times = 4
@@ -173,10 +173,14 @@ def get_rewards_and_steps(env, actor, if_render: bool = False) -> (float, int):
     for steps in range(max_step):
         tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         tensor_action = actor(tensor_state)
-        if if_discrete:
-            tensor_action = tensor_action.argmax(dim=1)
-        action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
-        state, reward, done, _ = env.step(action)
+        # 直接将 tensor 送入 reward
+        # print("tensor_action", tensor_action)
+        # if if_discrete:
+        #     tensor_action = tensor_action.argmax(dim=1)
+        # action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
+
+        # state, reward, done, _ = env.step(action)
+        state, reward, done, _ = env.step(tensor_action)
         returns += reward
 
         if if_render:

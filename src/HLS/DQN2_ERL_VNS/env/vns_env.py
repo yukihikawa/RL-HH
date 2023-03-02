@@ -34,7 +34,10 @@ class vns_env(gym.Env):
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
     def step(self, action):
-        action_c = action
+        # print('action in env:', action)
+        # action_c = action
+        action_c = action.argmax(dim=1, keepdim=True)
+        # print('action_c in env:', action_c)
         # 获取原本的时间,用于评估
         previous = self.vns.previous_time
         best = self.vns.best_time
@@ -43,7 +46,7 @@ class vns_env(gym.Env):
         self.ITER += 1
         # 执行
         self.heuristics[action_c]()
-        # 执行完毕,获取新实践
+        # 执行完毕,获取新时间
         newPrevious = self.vns.previous_time
         newBest = self.vns.best_time
         # 更新未改进回合数
@@ -60,7 +63,7 @@ class vns_env(gym.Env):
 
         termination = self.termination()
         # 奖励
-        reward = self.rewardA(previous, best, newPrevious, newBest, termination)
+        reward = self.reward(previous, best, newPrevious, newBest, termination)
 
         #if action_c in [3, 5, 6]:
         if action_c in [0, 1, 2, 3, 4]:
@@ -77,28 +80,8 @@ class vns_env(gym.Env):
         return s_, reward, termination, {}
 
     # 奖励函数
-    def reward(self, previous, best, new_previous, new_best, terminal = None):
-        if previous > new_previous:
-            reward = 10
-            self.rewardImpL += reward
-            if best > new_best:
-                reward += 100
-                self.rewardImpP += reward
-        elif previous == new_previous:
-            if self.NOT_IMPROVED < 40:
-                reward = 0
-            else:
-                reward = -1
-            self.rewardSta += reward
-        else:
-            if self.NOT_IMPROVED < 40:
-                reward = -1
-            else:
-                reward = 10
-            self.rewardMut += reward
-        return reward
 
-    def rewardA(self, previous, best, new_previous, new_best, terminal = None):
+    def reward(self, previous, best, new_previous, new_best, terminal = None):
         if previous > new_previous:
             reward = 10
             self.rewardImpL += reward
@@ -109,7 +92,7 @@ class vns_env(gym.Env):
             reward = -1
             self.rewardSta += reward
         else:
-            reward = 1
+            reward = 0.1 * self.NOT_IMPROVED
             self.rewardMut += reward
         if terminal:
             scale = 1000 #控制峰值

@@ -15,6 +15,7 @@ class QNet(nn.Module):  # nn.Module is a standard PyTorch Network
         super().__init__()
         self.net = build_mlp(dims=[state_dim, *dims, action_dim])
         layer_init_with_orthogonal(self.net[-1], std=0.1)
+        # layer_init_with_softmax(self.net[-1])
 
         self.explore_rate = 0.125
         self.action_dim = action_dim
@@ -23,10 +24,24 @@ class QNet(nn.Module):  # nn.Module is a standard PyTorch Network
         return self.net(state)  # Q values for multiple actions
 
     def get_action(self, state):
+        m = nn.Softmax(dim=1)
         if self.explore_rate < torch.rand(1):
-            action = self.net(state).argmax(dim=1, keepdim=True)
+            action = self.net(state)
+            # print('ori action', action, "shape:", action.shape)
+            action = m(action)
+            # print('action softmax: ', action)
+            # action = action.argmax(dim=1, keepdim=True)
+            # print('action argmax', action)
+
         else:
-            action = torch.randint(self.action_dim, size=(state.shape[0], 1))
+            # action = torch.randint(self.action_dim, size=(state.shape[0], self.action_dim))
+            # print('state in rand:', state.shape[0])
+            action = torch.randn(state.shape[0], self.action_dim)
+            # print('action rand: ', action, "shape:", action.shape)
+            action = m(action)
+            # print('action rand softmax: ', action)
+            # action = action.argmax(dim=1, keepdim=True)
+            # print('action rand argmax: ', action)
         return action
 
 
@@ -47,10 +62,13 @@ def build_mlp(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn
         activation = nn.ReLU
     net_list = []
     for i in range(len(dims) - 1):
+        # if i == len(dims) - 2:
+        #     activation = nn.Softmax
         net_list.extend([nn.Linear(dims[i], dims[i + 1]), activation()])
     if if_raw_out:
         del net_list[-1]  # delete the activation function of the output layer to keep raw output
     return nn.Sequential(*net_list)
+
 def build_mlp_ori(dims: [int], activation: nn = None, if_raw_out: bool = True) -> nn.Sequential:
     """
     build MLP (MultiLayer Perceptron)
@@ -72,6 +90,9 @@ def layer_init_with_orthogonal(layer, std=1.0, bias_const=1e-6):
     torch.nn.init.orthogonal_(layer.weight, std)
     torch.nn.init.constant_(layer.bias, bias_const)
 
+# def layer_init_with_softmax(layer, bias_const=1e-6):
+#     torch.nn.init.zeros_(layer.weight)
+#     torch.nn.init.constant_(layer.bias, bias_const)
 
 class NnReshape(nn.Module):
     def __init__(self, *args):
