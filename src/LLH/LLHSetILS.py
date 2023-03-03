@@ -19,7 +19,8 @@ class LLHSetILS():
         self.vnd = []
         # 添加方法
         # self.vnd.append(self.vnd1)
-        # self.vnd.append(self.vnd2)
+        self.vnd.append(self.vnd2)
+        # self.vnd.append(self.vnd2_1)
         # self.vnd.append(self.vnd3)
         # self.vnd.append(self.vnd4)
         # self.vnd.append(self.vnd5)
@@ -27,21 +28,28 @@ class LLHSetILS():
         # self.vnd.append(self.vnd7)
         # self.vnd.append(self.vnd8)
         # self.vnd.append(self.vnd9)
-        self.vnd.append(self.vnd10)
+        # self.vnd.append(self.vnd10)
         self.vnd.append(self.vnd11)
-        self.vnd.append(self.vnd12)
+        # self.vnd.append(self.vnd12)
         self.vnd.append(self.vnd13)
+        # self.vnd.append(self.vnd13_1)
+        # self.vnd.append(self.vnd14)
+        # self.vnd.append(self.vnd14_1)
+        # self.vnd.append(self.vnd15)
+        # self.vnd.append(self.vnd17)
+        # self.vnd.append(self.vnd18)
 
 
         # 用于扰动的 LLH
         self.shake = []
         #添加方法
         self.shake.append(self.shakeA)
-        self.shake.append(self.shakeB)
-        self.shake.append(self.shakeC)
-        self.shake.append(self.shakeD)
-        self.shake.append(self.shakeE)
-        self.shake.append(self.shakeF)
+        # self.shake.append(self.shakeB)
+        # self.shake.append(self.shakeC)
+        # self.shake.append(self.shakeD)
+        # self.shake.append(self.shakeF)
+        self.shake.append(self.shakeG)
+        self.shake.append(self.shakeH)
 
 
         #评估数据
@@ -479,6 +487,41 @@ class LLHSetILS():
         indexes = [0] * len(ms_s)
         start_task_cstr = [0] * len(ms_s)  # 每个操作的开始时间约束
 
+    pass
+    def vnd17(self, current_solution):
+        G_max = 3
+        (os, ms) = current_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+        return (new_os, ms)
+
+    def vnd18(self, current_solution):
+        (os, ms) = current_solution
+        jobs = self.parameters['jobs']
+        new_os = os.copy()
+
+        # 选择两个不同的作业
+        job1 = job2 = random.randint(0, len(jobs) - 1)
+        while job1 == job2:
+            job2 = random.randint(0, len(jobs) - 1)
+        idx1 = idx2 = 0
+        while idx1 < len(new_os) and idx2 < len(new_os):
+            while idx1 < len(new_os) and new_os[idx1] != job1:
+                idx1 += 1
+            while idx2 < len(new_os) and new_os[idx2] != job2:
+                idx2 += 1
+            if idx1 < len(new_os) and idx2 < len(new_os) and new_os[idx1] == job1 and new_os[idx2] == job2:
+                new_os[idx1], new_os[idx2] = new_os[idx2], new_os[idx1]
+            idx1 += 1
+            idx2 += 1
+
+        return (new_os, ms)
+
 
 
 
@@ -542,22 +585,6 @@ class LLHSetILS():
         newOs[ida], newOs[idb] = newOs[idb], newOs[ida]
         return (newOs, ms)
 
-    # 随机工序码区间破坏
-    def shakeE(self):
-        (os, ms) = self.previous_solution
-        ida = idb = random.randint(0, len(os) - 1)
-        while ida == idb:
-            idb = random.randint(0, len(os) - 1)
-        if ida > idb:
-            ida, idb = idb, ida
-        # 打乱区间的工序码顺序
-        newOs = os.copy()
-        mid = newOs[ida:idb + 1]
-        random.shuffle(mid)
-        newOs = os[:ida] + mid + os[idb + 1:]
-        # 替换当前解
-        return (newOs, ms)
-
     # 工序码子序列逆序
     def shakeF(self):
         (os, ms) = self.previous_solution
@@ -569,3 +596,38 @@ class LLHSetILS():
         newOs = os.copy()
         newOs[ida:idb + 1] = newOs[ida:idb + 1][::-1]
         return (newOs, ms)
+
+    # 14 多重 swap 移动
+    def shakeG(self):
+        G_max = 3
+        (os, ms) = self.previous_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+        return (new_os, ms)
+
+    def shakeH(self):
+        (os, ms) = self.previous_solution
+        jobs = self.parameters['jobs']
+        new_os = os.copy()
+
+        # 选择两个不同的作业
+        job1 = job2 = random.randint(0, len(jobs) - 1)
+        while job1 == job2:
+            job2 = random.randint(0, len(jobs) - 1)
+        idx1 = idx2 = 0
+        while idx1 < len(new_os) and idx2 < len(new_os):
+            while idx1 < len(new_os) and new_os[idx1] != job1:
+                idx1 += 1
+            while idx2 < len(new_os) and new_os[idx2] != job2:
+                idx2 += 1
+            if idx1 < len(new_os) and idx2 < len(new_os) and new_os[idx1] == job1 and new_os[idx2] == job2:
+                new_os[idx1], new_os[idx2] = new_os[idx2], new_os[idx1]
+            idx1 += 1
+            idx2 += 1
+
+        return (new_os, ms)

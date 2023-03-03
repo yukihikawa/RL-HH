@@ -1,11 +1,12 @@
 import random
 
-from src.LLH.LLHUtils import timeTaken, getMachineIdx, changeMsRandom
+from src.LLH.LLHUtils import timeTaken, getMachineIdx, changeMsRandom, get_machine_workload
 from src.utils import encoding
+from src.utils.decoding import decode, split_ms
 from src.utils.parser import parse
 
 
-class LLHSetVNS():
+class LLHSetVNS3():
     def __init__(self, train = False):
         # solutions
         # self.solution_population = []
@@ -18,29 +19,34 @@ class LLHSetVNS():
         # self.best_time = self.previous_time = timeTaken(self.previous_solution, self.parameters)
         # print('prev:', self.previous_time)
 
-
+        # 最好效果：12345， BDEF
         #llh
         self.llh = []
         # 添加所有函数到 llh
         self.llh.append(self.heuristic1)
-        self.llh.append(self.heuristic2)
+        # self.llh.append(self.heuristic2)
+        self.llh.append(self.heuristic2_1)
         self.llh.append(self.heuristic3)
         self.llh.append(self.heuristic4)
         self.llh.append(self.heuristic5)
-        # self.llh.append(self.heuristicA)
+        self.llh.append(self.heuristic6)
+        self.llh.append(self.heuristic7)
+        self.llh.append(self.heuristic8)
+        self.llh.append(self.heuristic9)
+        self.llh.append(self.heuristicA)
         self.llh.append(self.heuristicB)
-        # self.llh.append(self.heuristicC)
+        self.llh.append(self.heuristicC)
         self.llh.append(self.heuristicD)
         self.llh.append(self.heuristicE)
         self.llh.append(self.heuristicF)
-
-
-
+        self.llh.append(self.heuristicG)
+        self.llh.append(self.heuristicH)
     # 工具方法,更新最优解
     def update_best_solution(self):
         if self.best_time > self.previous_time:
             self.best_solution = self.previous_solution
             self.best_time = self.previous_time
+
 
     # 重设
     def reset(self, problem_path):
@@ -52,36 +58,26 @@ class LLHSetVNS():
             self.best_solution = self.previous_solution = encoding.initializeResult(self.parameters)
         self.previous_time = self.best_time = timeTaken(self.previous_solution, self.parameters)
 
-    def accept_wrapper(self, llh_call):
-        new_solution, new_time = self.llh[llh_call]()
-        if llh_call in [0, 1, 2, 3, 4]:
-            if new_time < self.previous_time:
-                self.previous_solution = new_solution
-                self.previous_time = new_time
-                return True
-        else:
-            self.previous_solution = new_solution
-            self.previous_time = new_time
-        self.update_best_solution()
-
-
 
 
     # VND==============================================
     # 工序码局部搜索,返回值为 previous_time 改写完成
-
     def heuristic1(self):
-        (os, ms) = self.previous_solution
-        idx = random.randint(0, len(os) - 1)
-        for i in range(0, len(os)):
-            newOs = os.copy()
+
+        idx = random.randint(0, len(self.previous_solution[0]) - 1)
+
+        for i in range(0, len(self.previous_solution[0])):
+            newOs = self.previous_solution[0].copy()
             k = newOs[idx]
             newOs = newOs[0:idx] + newOs[idx + 1: len(newOs)]
             newOs = newOs[0: i] + [k] + newOs[i: len(newOs)]
-            new_time = timeTaken((newOs, ms), self.parameters)
+            # 有优化即结束
+            new_time = timeTaken((newOs, self.previous_solution[1]), self.parameters)
             if self.previous_time > new_time:
-                return (newOs, ms), new_time
-        return (os, ms), self.previous_time
+                self.previous_solution = (newOs, self.previous_solution[1])
+                self.previous_time = new_time
+                self.update_best_solution()
+                return
 
     # 机器码局部搜索，全搜一遍,返回 previous_time 改写完成
     def heuristic2(self):
@@ -111,6 +107,36 @@ class LLHSetVNS():
                     self.previous_solution = (self.previous_solution[0], newMs)
                     self.previous_time = new_time
                     break
+        self.update_best_solution()
+
+    def heuristic2_1(self):
+        # self.check_tabu(os_ms)
+        # 获取作业集合
+        jobs = self.parameters['jobs']
+        # idx = self.get_randon_zero_index(self.ms_tabu)
+        # idx = random.randint(0, len(ms) - 1)
+        # self.ms_tabu[idx] = 1
+        # 搜索单个更优机器码序列
+        idx = random.randint(0, len(self.previous_solution[1]) - 1)
+        pass
+        mcLength = 0  # 工具人
+        jobIdx = -1  # 所属工作号
+        for job in jobs:
+            jobIdx += 1
+            if mcLength + len(job) >= idx + 1:
+                break
+            else:
+                mcLength += len(job)
+        opIdx = idx - mcLength  # 指定位置对应的 在工件中的工序号
+        # 开始搜索机器集合
+        for i in range(0, len(jobs[jobIdx][opIdx])):
+            newMs = self.previous_solution[1].copy()
+            newMs[idx] = i
+            new_time = timeTaken((self.previous_solution[0], newMs), self.parameters)
+            if self.previous_time > new_time:
+                self.previous_solution = (self.previous_solution[0], newMs)
+                self.previous_time = new_time
+                break
         self.update_best_solution()
 
     # 并行局部搜索 改进在此
@@ -199,6 +225,149 @@ class LLHSetVNS():
             self.previous_time = new_time
             self.update_best_solution()
 
+
+    # 13.1 工作负载局部搜索
+    def heuristic7_1(self):
+        G_MAX = 10
+        (os, ms) = self.previous_solution
+        new_os = os.copy()
+        new_ms = ms.copy()
+        for i in range(G_MAX):
+            # 对当前解进行解码
+            machine_operation = decode(self.parameters, new_os, new_ms)
+            # 获取工作负载
+            workload = get_machine_workload(self.parameters, machine_operation)
+            # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+            max_workload_machine = workload.index(max(workload))
+            # 从具有最大负载的机器中随机选择一个工序
+            selected_op = random.choice(machine_operation[max_workload_machine])
+            # 获取工序信息
+            job_idx, op_idx = map(int, selected_op[0].split('-'))
+            op_idx -= 1
+            # 获取工序的机器集合
+            machine_set = self.parameters['jobs'][job_idx][op_idx]
+            # 当前工序所在机器负载
+            prev_load = max(workload)
+            # 从机器集合中选择负载最小的机器
+            selected_new_machine = 0
+            for i in range(len(machine_set)):  # 遍历机器合集
+                machine_idx = machine_set[i]['machine']
+                new_load = workload[machine_idx - 1]
+                if new_load < prev_load:
+                    prev_load = new_load
+                    selected_new_machine = i  # 新的ms编码
+            #         print("sdfgsd:", selected_new_machine)
+            # print('selected_new_machine ggggg: ', selected_new_machine)
+            # 生成新的ms编码
+            ms_s = split_ms(self.parameters, new_ms)  # 分离的ms编码
+            # 在 ms 中的位置
+            ms_idx = 0
+            for i in range(job_idx):
+                ms_idx += len(ms_s[i])
+            ms_idx += op_idx
+            # new_ms = current_solution[1].copy()
+            # print('old ms: ', new_ms[ms_idx])
+            new_time = timeTaken((new_os, new_ms), self.parameters)
+            new_ms[ms_idx] = selected_new_machine
+            if self.previous_time > new_time:
+                self.previous_solution = (new_os, new_ms)
+                self.previous_time = new_time
+                self.update_best_solution()
+
+    # 工作负载邻域
+    def heuristic7(self):
+        G_MAX = 10
+        (os, ms) = self.previous_solution
+        new_os = os.copy()
+        new_ms = ms.copy()
+        # 对当前解进行解码
+        machine_operation = decode(self.parameters, new_os, new_ms)
+        # 获取工作负载
+        workload = get_machine_workload(self.parameters, machine_operation)
+        # 取得最大负载机器,workload中最大值的索引, 从 0 开始的
+        max_workload_machine = workload.index(max(workload))
+        # 从具有最大负载的机器中随机选择一个工序
+        selected_op = random.choice(machine_operation[max_workload_machine])
+        # 获取工序信息
+        job_idx, op_idx = map(int, selected_op[0].split('-'))
+        op_idx -= 1
+        # 获取工序的机器集合
+        machine_set = self.parameters['jobs'][job_idx][op_idx]
+        # 当前工序所在机器负载
+        prev_load = max(workload)
+        # 从机器集合中选择负载最小的机器
+        selected_new_machine = 0
+        for i in range(len(machine_set)):  # 遍历机器合集
+            machine_idx = machine_set[i]['machine']
+            new_load = workload[machine_idx - 1]
+            if new_load < prev_load:
+                prev_load = new_load
+                selected_new_machine = i  # 新的ms编码
+        #         print("sdfgsd:", selected_new_machine)
+        # print('selected_new_machine ggggg: ', selected_new_machine)
+        # 生成新的ms编码
+        ms_s = split_ms(self.parameters, new_ms)  # 分离的ms编码
+        # 在 ms 中的位置
+        ms_idx = 0
+        for i in range(job_idx):
+            ms_idx += len(ms_s[i])
+        ms_idx += op_idx
+        # new_ms = current_solution[1].copy()
+        # print('old ms: ', new_ms[ms_idx])
+
+        new_ms[ms_idx] = selected_new_machine
+        new_time = timeTaken((new_os, new_ms), self.parameters)
+        if self.previous_time > new_time:
+            self.previous_solution = (new_os, new_ms)
+            self.previous_time = new_time
+            self.update_best_solution()
+
+    # 多重相邻交换
+    def heuristic8(self):
+        G_max = 3
+        (os, ms) = self.previous_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+
+        new_time = timeTaken(self.previous_solution, self.parameters)
+        if self.previous_time > new_time:
+            self.previous_solution = (new_os, ms)
+            self.previous_time = new_time
+            self.update_best_solution()
+        return
+
+        # 作业交换
+
+    def heuristic9(self):
+        (os, ms) = self.previous_solution
+        jobs = self.parameters['jobs']
+        new_os = os.copy()
+
+        # 选择两个不同的作业
+        job1 = job2 = random.randint(0, len(jobs) - 1)
+        while job1 == job2:
+            job2 = random.randint(0, len(jobs) - 1)
+        idx1 = idx2 = 0
+        while idx1 < len(new_os) and idx2 < len(new_os):
+            while idx1 < len(new_os) and new_os[idx1] != job1:
+                idx1 += 1
+            while idx2 < len(new_os) and new_os[idx2] != job2:
+                idx2 += 1
+            if idx1 < len(new_os) and idx2 < len(new_os) and new_os[idx1] == job1 and new_os[idx2] == job2:
+                new_os[idx1], new_os[idx2] = new_os[idx2], new_os[idx1]
+            idx1 += 1
+            idx2 += 1
+        new_time = timeTaken(self.previous_solution, self.parameters)
+        if self.previous_time > new_time:
+            self.previous_solution = (new_os, ms)
+            self.previous_time = new_time
+            self.update_best_solution()
+        return
 
 
     # shaking=========================================================
@@ -308,7 +477,6 @@ class LLHSetVNS():
             self.previous_time = new_Time
             return
 
-
     # 1. 随机交换两个工序码, 返回新的工序码 已测
     def heuristicF(self):
         # print('1')
@@ -330,3 +498,45 @@ class LLHSetVNS():
             self.previous_solution = (newOs, ms)
             self.previous_time = new_time
             return
+
+
+    # 14 多重 swap 移动
+    def heuristicG(self):
+        G_max = 3
+        (os, ms) = self.previous_solution
+        new_os = os.copy()
+        for i in range(G_max):
+            idx = random.randint(1, len(os) - 2)
+            if new_os[idx] != new_os[idx - 1]:
+                new_os[idx - 1], new_os[idx] = new_os[idx], new_os[idx - 1]
+            else:
+                new_os[idx], new_os[idx + 1] = new_os[idx + 1], new_os[idx]
+        self.previous_solution = (new_os, ms)
+        new_time = timeTaken(self.previous_solution, self.parameters)
+        self.previous_time = new_time
+        return
+
+    # 作业交换
+    def heuristicH(self):
+        (os, ms) = self.previous_solution
+        jobs = self.parameters['jobs']
+        new_os = os.copy()
+
+        # 选择两个不同的作业
+        job1 = job2 = random.randint(0, len(jobs) - 1)
+        while job1 == job2:
+            job2 = random.randint(0, len(jobs) - 1)
+        idx1 = idx2 = 0
+        while idx1 < len(new_os) and idx2 < len(new_os):
+            while idx1 < len(new_os) and new_os[idx1] != job1:
+                idx1 += 1
+            while idx2 < len(new_os) and new_os[idx2] != job2:
+                idx2 += 1
+            if idx1 < len(new_os) and idx2 < len(new_os) and new_os[idx1] == job1 and new_os[idx2] == job2:
+                new_os[idx1], new_os[idx2] = new_os[idx2], new_os[idx1]
+            idx1 += 1
+            idx2 += 1
+        self.previous_solution = (new_os, ms)
+        new_time = timeTaken(self.previous_solution, self.parameters)
+        self.previous_time = new_time
+        return
