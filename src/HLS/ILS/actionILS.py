@@ -94,8 +94,8 @@ class action:
             current_time = timeTaken(current_solution, self.llh_manager.parameters)
             # print('shaked time: ', current_time)
             # 局部搜索
-            proposal_time: int | Any
-            proposal_solution: tuple[Any, Any] | None
+            # proposal_time: int | Any
+            # proposal_solution: tuple[Any, Any] | None
             proposal_solution, proposal_time = self.local_search(current_solution, current_time)
             delta_f = proposal_time - self.llh_manager.previous_time
             # 移动接受
@@ -135,7 +135,7 @@ class action:
                 proposal_time = new_time
 
                 # 重置算子顺序
-                random.shuffle(ls_operators)
+                # random.shuffle(ls_operators)
                 idx = 1
             else:
                 # print("no improvement: ")

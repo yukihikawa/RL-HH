@@ -9,6 +9,7 @@ from gym import spaces
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
 from src.HLS.DQN2_ERL_VNS.train import config
+from src.HLS.ILS.ILSSet import ILSSet
 from src.HLS.ILS.actionILS import action
 from src.LLH.LLHSetILS import LLHSetILS
 from src.LLH.LLHSetVNS import LLHSetVNS
@@ -28,7 +29,7 @@ class vns_env(gym.Env):
         self.problem = problem
         self.problem_path = problem_path
         self.solve_iter = solve_iter
-        self.action_manager = action()
+        self.action_manager = ILSSet()
         self.actions = self.action_manager.actions
         # 定义动作空间, LLH方法数量
         self.action_space = spaces.Discrete(len(self.actions))
@@ -48,36 +49,36 @@ class vns_env(gym.Env):
         # else:
         #     action_c = action
         action_c = action
-        print("stage: ", self.STAGE, 'global best: ', self.action_manager.llh_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.llh_manager.previous_time)
+        print()
+        print('==================================================')
+        print("iter: ", self.action_manager.prev_iter, 'global best: ', self.action_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.previous_time)
 
-        # 获取原本的时间,用于评估
-        previous = self.action_manager.llh_manager.previous_time
-        prev_global_best = self.action_manager.llh_manager.best_time
+
         # 设计并执行
-        self.action_manager.execute(action_c)
-        print('global best: ', self.action_manager.llh_manager.best_time, 'new_previous: ', self.action_manager.llh_manager.previous_time)
+        delta = self.action_manager.ILS(action_c)
+        print('global best: ', self.action_manager.best_time, 'new_previous: ', self.action_manager.previous_time)
         #终止条件
         termination = self.termination()
         # 奖励
-        reward = self.reward(previous)
+        reward = self.reward(delta)
         # 更新既往 avg(fit)
-        self.total_fitness += self.action_manager.llh_manager.previous_time
-        self.STAGE += 1
         # 状态norm( f ) = f /Avg( fnew)
-        s_ = self.action_manager.llh_manager.previous_time / (self.total_fitness / self.STAGE)
+        s_ = self.action_manager.previous_time / (self.action_manager.total_fitness / self.action_manager.prev_iter)
         if s_ > 1:
             s_ = 1
 
 
         if termination:
             self.render()
-            return s_, reward, termination, {'bestTime': self.action_manager.llh_manager.best_time}
+            return s_, reward, termination, {'bestTime': self.action_manager.best_time}
         return np.array([s_,]), reward, termination, {}
 
     # 奖励函数
-    def reward(self, prev_global_best):
-        if prev_global_best > self.action_manager.llh_manager.best_time:
+    def reward(self, delta):
+        if delta < 0:
             reward = 1
+        elif delta == 0:
+            reward = 0
         else:
             reward = -1
         self.total_reward += reward
@@ -87,8 +88,7 @@ class vns_env(gym.Env):
 
     # 终止条件
     def termination(self):
-        #if self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1]) or self.ITER > 5000:
-        if self.action_manager.check_exceed_time_limit():
+        if self.action_manager.prev_iter == self.solve_iter:
             return True
         else:
             return False
@@ -100,12 +100,9 @@ class vns_env(gym.Env):
         # print('train: ', self.vns.train)
         self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.TARGET = BEST_TIME[self.problem]
-        self.action_manager.llh_manager.reset(self.problem_path) # 重设底层 LLH
-        self.action_manager.set_time_start()
-        self.action_manager.time_limit = self.time_limit
-        self.action_manager.NoE = self.NoE
+        self.action_manager.reset(self.problem_path) # 重设底层 LLH
         # 初始fitness
-        self.original_time = self.action_manager.llh_manager.previous_time
+        self.original_time = self.action_manager.previous_time
         # print(self.best_solution[0])
         # print(self.best_solution[1])
         # self.NOT_IMPROVED_BEST = 1
@@ -116,8 +113,8 @@ class vns_env(gym.Env):
         # self.rewardSta = 0
         # self.rewardEnd = 0
         self.total_reward = 0
-        self.total_fitness = self.original_time
-        self.STAGE = 1
+        # self.total_fitness = self.original_time
+        # self.STAGE = 1
 
         # self.prevState = random.randint(0, len(self.heuristics))
         # self.callCount = [0 for i in range(len(self.heuristics))]
@@ -137,7 +134,7 @@ class vns_env(gym.Env):
         # print('reward from end: ', self.rewardEnd)
         # print('total reward', self.rewardImpP + self.rewardImpL + self.rewardSta + self.rewardMut + self.rewardEnd)
         print('total_reward', self.total_reward)
-        print("finish time: ", self.action_manager.llh_manager.best_time)
+        print("finish time: ", self.action_manager.best_time)
         print('====================================================')
         # gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
         # gantt.draw_chart(gantt_data)
