@@ -11,8 +11,6 @@ from src.utils.parser import parse
 # 维护一个全局最优解和当前邻域解
 # 维护扰动LLH的评估数据
 
-
-
 class LLHSetILS():
     def __init__(self):
         # 用于 VND 过程的 LLH
@@ -73,20 +71,6 @@ class LLHSetILS():
         self.previous_solution = self.best_solution
         self.previous_time = self.best_time
 
-        # 重置评估数据
-        self.total_duration = [0] * len(self.shake)  # 运行总时间
-        self.total_improvement = [0] * len(self.shake)  # 获得改进的量
-        self.total_Noop = [0] * len(self.shake)  # 无变化次数
-        self.total_selected = [0] * len(self.shake)  # 被选择次数
-        self.total_accepted = [0] * len(self.shake)  # 被接受次数
-        self.C = 100000
-        # 根据 shake 长度初始化
-        self.eval_recent_improve = [1000] * len(self.shake)  # 最近的改进
-        self.eval_by_accept = [1000] * len(self.shake)  # 最近被接受
-        self.eval_improve_overtime = [100000000000.0] * len(self.shake)  # 平均时间单位的改进
-        self.eval_by_speed = [10000000.0] * len(self.shake)  # 运行速度->平均运行时间的倒数
-        self.eval_by_speed_accepted = [10000000.0] * len(self.shake)  # 获得一个被接受解所需的平均运行时间的倒数
-        self.eval_by_speed_new = [10000000.0] * len(self.shake)  # 获得一个变动解所需的平均运行时间的倒数
 
     # 接受当前解
     def accept_proposal_solution(self, proposal_solution, proposal_time):
@@ -104,24 +88,6 @@ class LLHSetILS():
     def refresh_previous_solution(self):
         self.previous_solution = self.best_solution
         self.previous_time = self.best_time
-
-    # 根据被选择的llh序号\运行持续时间\改进量\是否被接受,更新评估数据
-    def update_evaluation_score(self, shake_idx: int, duration: float, delta_f: int, accepted: bool):
-        #更新扰动评估基础数据
-        self.total_duration[shake_idx] += duration
-        self.total_improvement[shake_idx] += max(0, delta_f)
-        if delta_f == 0:
-            self.total_Noop[shake_idx] += 1
-        self.total_selected[shake_idx] += 1
-        if accepted:
-            self.total_accepted[shake_idx] += 1
-        #更新选择依赖数据
-        self.eval_recent_improve[shake_idx] = max(0, delta_f)
-        self.eval_by_accept[shake_idx] = 1 if accepted else 0
-        self.eval_improve_overtime[shake_idx] = self.C * self.total_improvement[shake_idx]  / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
-        self.eval_by_speed[shake_idx] = (self.total_selected[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
-        self.eval_by_speed_accepted[shake_idx] = (self.total_accepted[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
-        self.eval_by_speed_new[shake_idx] = (self.total_accepted[shake_idx] - self.total_Noop[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
 
 
     # =====================VND局部搜索LLH============================

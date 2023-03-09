@@ -1,11 +1,9 @@
 import os
+
 import gym
 
-from src.LLH.LLHSetILS import LLHSetILS
-from src.LLH.LLHSetVNS import LLHSetVNS
-from src.LLH.LLHolder import LLHolder
-from train.config import Config
 from agents.AgentDQN import AgentDQN
+from train.config import Config
 from train.run import train_agent
 from env import vns_env
 gym.logger.set_level(40)  # Block warning
@@ -13,7 +11,7 @@ from src.HLS.ILS.actionILS import action
 
 PROBLEM = 'MK06'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-LLH_SET = 'VNS-ILS_LONG_LS'
+LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
 
 
@@ -33,10 +31,10 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
         'train': True,
-        'time_limit': 800,
-        'NoE': 50,
+        'time_limit': 50,
+        'NoE': 20,
     }
-    #get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
+    # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
     args = Config(agent_class, env_class, env_args)  # see `config.py Arguments()` for hyperparameter explanation
     args.break_step = int(1e5)  # break training if 'total_step > break_step'

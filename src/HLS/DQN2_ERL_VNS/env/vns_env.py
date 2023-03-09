@@ -11,8 +11,7 @@ import src.utils.encoding as encoding
 from src.HLS.DQN2_ERL_VNS.train import config
 from src.HLS.ILS.actionILS import action
 from src.LLH.LLHSetILS import LLHSetILS
-from src.LLH.LLHSetVNS import LLHSetVNS
-from src.LLH.LLHolder import LLHolder
+
 from src.utils import parser
 
 
@@ -91,10 +90,10 @@ class vns_env(gym.Env):
     # 终止条件
     def termination(self):
         #if self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1]) or self.ITER > 5000:
-        if self.action_manager.check_exceed_time_limit():
-            return True
-        else:
+        if self.STAGE < self.time_limit:
             return False
+        else:
+            return True
 
     def reset(self, **kwargs):
         # print('llh_set: ', self.llh_set)
@@ -104,7 +103,7 @@ class vns_env(gym.Env):
         self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.TARGET = BEST_TIME[self.problem]
         self.action_manager.llh_manager.reset(self.problem_path) # 重设底层 LLH
-        self.action_manager.set_time_start()
+        # self.action_manager.set_time_start()
         self.action_manager.time_limit = self.time_limit
         self.action_manager.NoE = self.NoE
         # 初始fitness

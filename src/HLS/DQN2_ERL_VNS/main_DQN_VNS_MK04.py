@@ -1,9 +1,7 @@
 import os
 import gym
 
-from src.LLH.LLHSetILS import LLHSetILS
-from src.LLH.LLHSetVNS import LLHSetVNS
-from src.LLH.LLHolder import LLHolder
+
 from train.config import Config
 from agents.AgentDQN import AgentDQN
 from train.run import train_agent
