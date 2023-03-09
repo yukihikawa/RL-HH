@@ -10,7 +10,7 @@ from src.LLH.LLHolder import LLHolder
 from train.config import Config, get_gym_env_args, build_env
 from agents.AgentDQN import AgentDQN
 from train.run import train_agent
-from env import vns_env
+from env import vns_env_new
 
 gym.logger.set_level(40)  # Block warning
 

@@ -29,7 +29,7 @@ class action:
         self.move_acceptors.append(self.acceptanceOI)
         self.move_acceptors.append(self.acceptanceAM)
         self.move_acceptors.append(self.acceptanceNA)
-        self.move_acceptors.append(self.acceptanceSA)
+        # self.move_acceptors.append(self.acceptanceSA)
         self.move_acceptors.append(self.acceptanceAPW)
 
         # 选择-移动接受动作对, 一对索引的列表
@@ -70,6 +70,7 @@ class action:
     def execute(self, action):
         self.set_iter_start()
         # print(self.iter_start)
+        # print(self.NoE)
         t_expire = self.iter_start + self.time_limit / self.NoE # 本次迭代的时间限制
         # print('iter time: ', self.time_limit / self.NoE )
         # print(self.actions[action][0], ' and ', self.actions[action][1])
@@ -84,7 +85,9 @@ class action:
         # print('in execute')
         # print('global best: ', self.llh_manager.best_time,
         #       'previous: ', self.llh_manager.previous_time)
+        counter = 0
         while current < t_expire:
+            counter += 1
             # print('===========================================')
             # print('current time: ', current, 't_expire: ', t_expire)
             # print('prev_time:', self.llh_manager.previous_time)
@@ -94,8 +97,8 @@ class action:
             current_time = timeTaken(current_solution, self.llh_manager.parameters)
             # print('shaked time: ', current_time)
             # 局部搜索
-            proposal_time: int | Any
-            proposal_solution: tuple[Any, Any] | None
+            # proposal_time: int | Any
+            # proposal_solution: tuple[Any, Any] | None
             proposal_solution, proposal_time = self.local_search(current_solution, current_time)
             delta_f = proposal_time - self.llh_manager.previous_time
             # 移动接受
@@ -105,6 +108,7 @@ class action:
             # 更新改进量和改进次数
             self.llh_manager.update_evaluation_score(shake_idx, duration, delta_f, accepted)
             current = time.time()
+        print("local search run ", counter, " times")
 
 
 
@@ -135,7 +139,7 @@ class action:
                 proposal_time = new_time
 
                 # 重置算子顺序
-                random.shuffle(ls_operators)
+                # random.shuffle(ls_operators)
                 idx = 1
             else:
                 # print("no improvement: ")

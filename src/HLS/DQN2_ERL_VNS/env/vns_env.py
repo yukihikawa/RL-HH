@@ -76,8 +76,11 @@ class vns_env(gym.Env):
 
     # 奖励函数
     def reward(self, prev_global_best):
-        if prev_global_best > self.action_manager.llh_manager.best_time:
+        delta = prev_global_best - self.action_manager.llh_manager.best_time
+        if delta > 0:
             reward = 1
+        elif delta == 0:
+            reward = 0
         else:
             reward = -1
         self.total_reward += reward

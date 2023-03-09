@@ -18,18 +18,18 @@ class LLHSetILS():
         # 用于 VND 过程的 LLH
         self.vnd = []
         # 添加方法
-        # self.vnd.append(self.vnd1)
-        # self.vnd.append(self.vnd2)
-        # self.vnd.append(self.vnd3)
-        # self.vnd.append(self.vnd4)
-        # self.vnd.append(self.vnd5)
-        # self.vnd.append(self.vnd6)
-        # self.vnd.append(self.vnd7)
-        # self.vnd.append(self.vnd8)
-        # self.vnd.append(self.vnd9)
-        self.vnd.append(self.vnd10)
+        self.vnd.append(self.vnd1)
+        self.vnd.append(self.vnd2)
+        self.vnd.append(self.vnd3)
+        self.vnd.append(self.vnd4)
+        self.vnd.append(self.vnd5)
+        self.vnd.append(self.vnd6)
+        self.vnd.append(self.vnd7)
+        self.vnd.append(self.vnd8)
+        self.vnd.append(self.vnd9)
+        # self.vnd.append(self.vnd10)
         self.vnd.append(self.vnd11)
-        self.vnd.append(self.vnd12)
+        # self.vnd.append(self.vnd12)
         self.vnd.append(self.vnd13)
 
 
@@ -118,10 +118,10 @@ class LLHSetILS():
         #更新选择依赖数据
         self.eval_recent_improve[shake_idx] = max(0, delta_f)
         self.eval_by_accept[shake_idx] = 1 if accepted else 0
-        self.eval_improve_overtime[shake_idx] = self.C * self.total_improvement[shake_idx]  / self.total_duration[shake_idx]
-        self.eval_by_speed[shake_idx] = (self.total_selected[shake_idx] + 1) / self.total_duration[shake_idx]
-        self.eval_by_speed_accepted[shake_idx] = (self.total_accepted[shake_idx] + 1) / self.total_duration[shake_idx]
-        self.eval_by_speed_new[shake_idx] = (self.total_accepted[shake_idx] - self.total_Noop[shake_idx] + 1) / self.total_duration[shake_idx]
+        self.eval_improve_overtime[shake_idx] = self.C * self.total_improvement[shake_idx]  / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
+        self.eval_by_speed[shake_idx] = (self.total_selected[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
+        self.eval_by_speed_accepted[shake_idx] = (self.total_accepted[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
+        self.eval_by_speed_new[shake_idx] = (self.total_accepted[shake_idx] - self.total_Noop[shake_idx] + 1) / self.total_duration[shake_idx] if self.total_duration[shake_idx] > 0 else 0
 
 
     # =====================VND局部搜索LLH============================
