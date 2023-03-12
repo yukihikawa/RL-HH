@@ -12,7 +12,7 @@ from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
 
-PROBLEM = 'MK01'
+PROBLEM = 'MK07'
 GEN_NUM =5000
 TEST_ITER = 20
 LLH_SET = 1
@@ -37,7 +37,7 @@ def runForTest(problem, genNum, LLH):
             if new_time < best_time:
                 best_time = new_time
                 best_solution = new_solution
-                print('iter:', gen, 'new best time: ', best_time)
+                print('iter:', gen, 'new best time: ', best_time, 'llh: ', idx)
         else:
             if random.random() < math.exp(-(new_time - prevTime) / (notAccepted * 0.01)):
                 prevSolution = new_solution

@@ -12,10 +12,10 @@ from src.LLH.LLHolder import LLHolder
 from src.utils.encoding import initializeResult
 from src.utils.parser import parse
 
-PROBLEM = 'MK06'
+PROBLEM = 'MK03'
 GEN_NUM =5000
-TEST_ITER = 10
-LLH_SET = 6
+TEST_ITER = 20
+LLH_SET = 1
 
 def runForTest(problem, genNum, LLH):
     t0 = time.time()

@@ -14,7 +14,7 @@ from src.utils.parser import parse
 
 PROBLEM = 'MK08'
 GEN_NUM =5000
-TEST_ITER = 10
+TEST_ITER = 20
 LLH_SET = 1
 
 def runForTest(problem, genNum, LLH):
