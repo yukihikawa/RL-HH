@@ -72,7 +72,7 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
     timeUsed = {}
     for i in range(render_times):
         t0 = time.time()
-        cumulative_reward, episode_step, bestTime = get_rewards_and_steps_solve(env, actor, if_render=False)
+        cumulative_reward, episode_step, bestTime, convergence  = get_rewards_and_steps_solve(env, actor, if_render=False)
         print(f"|{i:4}  cumulative_reward {cumulative_reward:9.3f}  episode_step {episode_step:5.0f}")
         t1 = time.time()
         allResult['test ' + str(i)] = bestTime

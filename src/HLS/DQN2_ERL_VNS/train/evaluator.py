@@ -213,6 +213,9 @@ def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, 
     steps = None
     returns = 0.0  # sum of rewards in an episode
     result = {}
+
+    convergence = []
+
     t1 = time.time()
     for steps in range(max_step):
         tensor_state = torch.as_tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
@@ -222,21 +225,23 @@ def get_rewards_and_steps_solve(env, actor, if_render: bool = False) -> (float, 
         action = tensor_action.detach().cpu().numpy()[0]  # not need detach(), because using torch.no_grad() outside
         state, reward, done, result = env.step(action)
         returns += reward
-
+        convergence.append(result['bestTime'])
         if if_render:
             env.render()
             time.sleep(0.02)
 
         if done:
             t2 = time.time()
-            print("time: ", t2 - t1)
+            print("time cost: ", t2 - t1)
+            print("NoE", env.NoE, "Total E: ", env.time_limit)
+            print("convergence step: ", convergence)
             break
     else:
         print("| get_rewards_and_step: WARNING. max_step > 12345")
     returns = getattr(env, 'cumulative_returns', returns)
     steps += 1
 
-    return returns, steps, result['bestTime']
+    return returns, steps, result['bestTime'], convergence
 
 
 def get_rewards_and_step_from_vec_env(env, actor) -> [(float, float)]:

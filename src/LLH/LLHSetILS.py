@@ -60,13 +60,18 @@ class LLHSetILS():
 
     #=======================工具方法===========================
     # 重设管理器状态
-    def reset(self, problem_path):
+    def reset(self, problem_path, train = True):
 
         # 重置问题参数
         self.parameters = parse(problem_path)
         # 初始化全局最优解
-        self.best_solution = encoding.initializeResult(self.parameters)
+        if train:
+            self.best_solution = encoding.initializeFixedResult(self.parameters)
+            print('fix')
+        else:
+            self.best_solution = encoding.initializeResult(self.parameters)
         self.best_time = timeTaken(self.best_solution, self.parameters)
+        print('best_time', self.best_time)
         #设置当前邻域解
         self.previous_solution = self.best_solution
         self.previous_time = self.best_time

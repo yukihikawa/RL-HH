@@ -71,7 +71,7 @@ class vns_env(gym.Env):
         if termination:
             self.render()
             return s_, reward, termination, {'bestTime': self.action_manager.llh_manager.best_time}
-        return np.array([s_,]), reward, termination, {}
+        return np.array([s_,]), reward, termination, {'bestTime': self.action_manager.llh_manager.best_time}
 
     # 奖励函数
     def reward(self, ori_prev, prev_global_best):
@@ -104,7 +104,7 @@ class vns_env(gym.Env):
         # print('train: ', self.vns.train)
         self.TERMINATION_TIME = IDEAL_TIME[self.problem][1]
         self.TARGET = BEST_TIME[self.problem]
-        self.action_manager.llh_manager.reset(self.problem_path) # 重设底层 LLH
+        self.action_manager.llh_manager.reset(self.problem_path, self.train) # 重设底层 LLH
         # self.action_manager.set_time_start()
         self.action_manager.time_limit = self.time_limit
         self.action_manager.NoE = self.NoE

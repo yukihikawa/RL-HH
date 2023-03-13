@@ -14,7 +14,7 @@ from src.HLS.ILS.actionILS import action
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK05'
+PROBLEM = 'MK06'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
@@ -39,9 +39,9 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'problem_path': PROBLEM_PATH,
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
-        'train': False,
-        'time_limit': 40,
-        'NoE': 20,
+        'train': True,
+        'time_limit': 60,
+        'NoE': 35,
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
@@ -70,13 +70,15 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
     actor.load_state_dict(torch.load(actor_path + MODULE, map_location=lambda storage, loc: storage).state_dict())
     allResult = {}
     timeUsed = {}
+    all_conv = []
     for i in range(render_times):
         t0 = time.time()
-        cumulative_reward, episode_step, bestTime = get_rewards_and_steps_solve(env, actor, if_render=False)
+        cumulative_reward, episode_step, bestTime, convergence = get_rewards_and_steps_solve(env, actor, if_render=False)
         print(f"|{i:4}  cumulative_reward {cumulative_reward:9.3f}  episode_step {episode_step:5.0f}")
         t1 = time.time()
         allResult['test ' + str(i)] = bestTime
         timeUsed['test ' + str(i)] = t1 - t0
+        all_conv.append(convergence)
     print('problem: ', PROBLEM, 'LLH_SET: ', LLH_SET, 'solve_iter: ', SOLVE_ITER, 'render_times: ', RENDER_TIMES)
     print('state: ', STATE, 'reward: ', REWARD, 'actor_path: ', actor_path, '  MODULE: ', MODULE, 'net_dims: ', net_dims)
     print(allResult.values())
