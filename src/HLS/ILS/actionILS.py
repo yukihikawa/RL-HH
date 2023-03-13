@@ -58,7 +58,7 @@ class action:
             # 移动接受
             Move_acceptance(proposal_solution, proposal_time)
 
-        print("local search run ", counter, " times")
+        # print("local search run ", counter, " times")
 
 
 

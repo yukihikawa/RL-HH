@@ -26,9 +26,9 @@ class QNet(nn.Module):  # nn.Module is a standard PyTorch Network
         if self.explore_rate < torch.rand(1):
             action = self.net(state) #[1]->[30]
             action = action.unsqueeze(0)#[1,30]
-            print('action ori :', action)
+            # print('action ori :', action)
             action = action.argmax(dim=1, keepdim=True)
-            print('action argmax:', action)
+            # print('action argmax:', action)
         else:
             action = torch.randint(self.action_dim, size=(state.shape[0], 1))
         return action

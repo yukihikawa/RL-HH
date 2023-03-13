@@ -11,7 +11,7 @@ from src.HLS.ILS.actionILS import action
 
 PROBLEM = 'MK02'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
-LLH_SET = 'VNS-ILS'
+LLH_SET = 'VNS-ILS-new reward'
 SOLVE_ITER = 2000
 
 
@@ -31,8 +31,8 @@ def train_dqn_for_hyper_heuristic(gpu_id=0):
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
         'train': True,
-        'time_limit': 40,
-        'NoE': 20,
+        'time_limit': 100,
+        'NoE': 5,
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 

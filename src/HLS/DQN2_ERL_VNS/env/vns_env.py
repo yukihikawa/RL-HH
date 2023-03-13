@@ -47,10 +47,10 @@ class vns_env(gym.Env):
         # else:
         #     action_c = action
         action_c = action
-        print("stage: ", self.STAGE, 'global best: ', self.action_manager.llh_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.llh_manager.previous_time)
+        # print("stage: ", self.STAGE, 'global best: ', self.action_manager.llh_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.llh_manager.previous_time)
 
         # 获取原本的时间,用于评估
-        previous = self.action_manager.llh_manager.previous_time
+        ori_previous = self.action_manager.llh_manager.previous_time
         prev_global_best = self.action_manager.llh_manager.best_time
         # 设计并执行
         self.action_manager.execute(action_c)
@@ -58,7 +58,7 @@ class vns_env(gym.Env):
         #终止条件
         termination = self.termination()
         # 奖励
-        reward = self.reward(previous)
+        reward = self.reward(ori_previous, prev_global_best)
         # 更新既往 avg(fit)
         self.total_fitness += self.action_manager.llh_manager.previous_time
         self.STAGE += 1
@@ -74,10 +74,12 @@ class vns_env(gym.Env):
         return np.array([s_,]), reward, termination, {}
 
     # 奖励函数
-    def reward(self, prev_global_best):
-        delta = prev_global_best - self.action_manager.llh_manager.best_time
+    def reward(self, ori_prev, prev_global_best):
+        delta = ori_prev - self.action_manager.llh_manager.previous_time
         if delta > 0:
             reward = 1
+            if prev_global_best > self.action_manager.llh_manager.best_time:
+                reward += 10
         elif delta == 0:
             reward = 0
         else:
