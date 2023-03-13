@@ -13,7 +13,7 @@ gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK06'
 LLH_SET = 1
-SOLVE_ITER = 5000
+SOLVE_ITER = 6000
 RENDER_TIMES = 10
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):

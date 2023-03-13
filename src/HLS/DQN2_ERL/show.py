@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-ACTOR_PATH = f"./hh_env-v0_DQN_0_MK02"
+ACTOR_PATH = f"./hh_env-v0_DQN_0_MK04"
 MODULE = '/recorder.npy'
 recorder = np.load(ACTOR_PATH + MODULE)
 
@@ -23,6 +23,9 @@ def draw_learning_curve(recorder: np.ndarray = None,
     write `mpl.use('Agg')` before `import matplotlib.pyplot as plt`
     https://stackoverflow.com/a/4935945/9293137
     """
+
+    print(r_avg)
+    print(r_std)
 
     import matplotlib.pyplot as plt
     fig, axs = plt.subplots(1)

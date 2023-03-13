@@ -11,10 +11,10 @@ from env import hh_env
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK07'
+PROBLEM = 'MK04'
 LLH_SET = 1
-SOLVE_ITER = 5000
-RENDER_TIMES = 10
+SOLVE_ITER = 10000
+RENDER_TIMES = 1
 
 def run_dqn_for_hyper_heuristic(gpu_id=0):
     agent_class = AgentDQN  # DRL algorithm

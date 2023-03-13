@@ -46,3 +46,36 @@ def initializePopulation(parameters):
         gen1.append((OS, MS))
 
     return gen1
+
+#生成确定工序码
+def generateFixedOS(parameters):
+    jobs = parameters['jobs']  # 从dict中取出,jobs 为包含所有任务/工件的 list
+
+    OS = []  # 任务的标号
+    i = 0
+    for job in jobs:  # 每个任务标一个号
+        for op in job:  # 重复出现次数为该任务的工序数目
+            OS.append(i)
+        i = i + 1
+
+    #random.shuffle(OS)  # 随机打乱位置
+
+    return OS
+
+# 确定性生成机器码
+def generateFixedMS(parameters):
+    jobs = parameters['jobs']
+
+    MS = []
+    for job in jobs:  # 遍历每个工序
+        for op in job:  # 遍历工序的可选机器列表
+            #randomMachine = random.randint(0, len(op) - 1)  # 随机选取一个可选机器
+            randomMachine = 0
+            MS.append(randomMachine)  # 加入机器码序列
+    return MS
+
+# 确定性初始化解
+def initializeFixedResult(parameters):
+    OS = generateFixedOS(parameters)
+    MS = generateFixedMS(parameters)
+    return (OS, MS)

@@ -15,8 +15,8 @@ gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK06'
 LLH_SET = 1
-SOLVE_ITER = 5000
-RENDER_TIMES = 20
+SOLVE_ITER = 1000
+RENDER_TIMES = 1
 ACTOR_PATH = f"./hh_env-v0_DQN_0_MK06"
 MODULE = '/actor__000000143872_00150.467.pt'
 STATE = 'cla'

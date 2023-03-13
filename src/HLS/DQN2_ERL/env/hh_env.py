@@ -4,6 +4,7 @@ import random
 import gym
 import numpy as np
 from gym import spaces
+from matplotlib import pyplot as plt
 
 import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
@@ -69,35 +70,29 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward3(newTime)
+        reward = self.reward3B(newTime)
         #print(" newTime: ", newTime)
         # 解的接受
         self.accept(newTime, newSolution, action_c)
 
-        #OLDSTATE
-        # if action_c in [3, 5, 6]:
-        #     # if action in [0, 1, 2]:
-        #     ck = 20
-        # else:
-        #     ck = 40
-        # delta = (self.prevTime - newTime) / self.prevTime + ck #局部最优判定
-        # s_ = np.array([action_c, self.NOT_IMPROVED, delta])
-
-        # NEW_STATE
-        # delta = self.prevTime - newTime
-        # s_ = np.array([action_c, self.NOT_IMPROVED, delta])
-
         #newstate2
         delta = self.prevTime - newTime
+
+
         if action_c in [3, 5, 6]:
             cla = 20
+
         else:
             cla = 40
+        self.heuristicNo.append(action_c)
+        self.heuristicType.append(cla)
+        self.iter_type.append(self.ITER)
+        self.step_result.append(self.bestTime)
         s_ = np.array([cla, self.NOT_IMPROVED, delta])
 
         if termination:
             self.render()
-            reward = self.endReward4()
+            # reward = self.endReward4()
             return s_, reward, termination, {'bestTime': self.bestTime}
         return s_, reward, termination, {}
 
@@ -163,7 +158,24 @@ class hh_env(gym.Env):
         return reward
 
     def reward3B(self, newTime):
-        pass
+        if self.prevTime > newTime:
+            reward = 10
+            if self.bestTime > newTime:
+                reward = 100
+            self.rewardImp += reward
+        elif self.prevTime == newTime:
+            if self.NOT_IMPROVED <= 5:
+                reward = 0
+            else:
+                reward = -1
+            self.rewardSta += reward
+        else:
+            if self.NOT_IMPROVED <= 5:
+                reward = -1
+            else:
+                reward = 0
+            self.rewardMut += reward
+        return reward
     def endReward4(self):
         #BestTime越小,奖励值越高
         if (self.bestTime in range(IDEAL_TIME[self.problem][0], IDEAL_TIME[self.problem][1] + 1)):
@@ -182,7 +194,7 @@ class hh_env(gym.Env):
     def reset(self, **kwargs):
         self.TERMINATION_TIME = BEST_TIME[self.problem]
         self.parameters = parser.parse(self.problem_path)
-        self.best_solution = self.solution = encoding.initializeResult(self.parameters)
+        self.best_solution = self.solution = encoding.initializeFixedResult(self.parameters)
         self.NOT_ACCEPTED = 1
         self.NOT_IMPROVED = 1
         self.rewardImp = 0
@@ -193,6 +205,11 @@ class hh_env(gym.Env):
         self.prevState = random.randint(0, 10)
         self.callCount = [0 for i in range(len(self.heuristics))]
         self.improveCount = [0 for i in range(len(self.heuristics))]
+        # 记录采用的启发式类型
+        self.heuristicType = []
+        self.heuristicNo = []
+        self.iter_type = []
+        self.step_result = []
         # 返回一个一维的整型张量,随机取值,取值范围是[0,10)
         return np.array([self.prevState, self.NOT_IMPROVED, 0])
 
@@ -206,8 +223,18 @@ class hh_env(gym.Env):
         print('reward from mutation: ', self.rewardMut)
         print('total reward', self.rewardImp + self.rewardSta + self.rewardMut)
         print("finish time: ", self.bestTime)
+        # print('iter: ', self.iter_type)
+        # print('heuristic type: ', self.heuristicType)
+        # print('heuristic no: ', self.heuristicNo)
         # gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
         # gantt.draw_chart(gantt_data)
+        plt.title("MK06")
+        x = range(len(self.step_result))
+        plt.plot(x, self.step_result)  # o-:圆形
+        plt.xlabel("ITER")  # 横坐标名字
+        plt.ylabel("BestTime")  # 纵坐标名字
+        # plt.legend(loc="best")  # 图例
+        plt.show()
 
     def close(self):
         pass
