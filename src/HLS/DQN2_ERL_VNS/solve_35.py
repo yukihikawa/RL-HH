@@ -39,7 +39,7 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'problem_path': PROBLEM_PATH,
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
-        'train': True,
+        'train': False,
         'time_limit': 60,
         'NoE': 35,
     }
@@ -85,6 +85,7 @@ def render_agent(env_class, env_args: dict, net_dims: [int], agent_class, actor_
     print(timeUsed.values())
     print('average time: ', sum(allResult.values()) / len(allResult.values()))
     print('average time used: ', sum(timeUsed.values()) / len(timeUsed.values()))
+    print(all_conv)
 
 
 

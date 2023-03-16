@@ -14,7 +14,7 @@ from src.HLS.ILS.actionILS import action
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK06'
+PROBLEM = 'MK07'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
