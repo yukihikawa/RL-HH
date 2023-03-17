@@ -24,7 +24,7 @@ class LLHSetILS():
         self.vnd.append(self.vnd6)
         self.vnd.append(self.vnd7)
         self.vnd.append(self.vnd8)
-        # self.vnd.append(self.vnd9)
+        self.vnd.append(self.vnd9)
         # self.vnd.append(self.vnd10)
         self.vnd.append(self.vnd11)
         # self.vnd.append(self.vnd12)
@@ -48,6 +48,8 @@ class LLHSetILS():
         # self.shake.append(self.shakeE)
         self.shake.append(self.shakeF)
         self.shake.append(self.shakeG)
+
+        self.all = self.vnd + self.shake
 
 
         #评估数据

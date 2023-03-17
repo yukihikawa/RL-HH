@@ -47,6 +47,7 @@ class vns_env(gym.Env):
         # else:
         #     action_c = action
         action_c = action
+        action_c = random.randint(0, len(self.actions) - 1)
         # print("stage: ", self.STAGE, 'global best: ', self.action_manager.llh_manager.best_time, 'action: ', action_c, 'previous: ', self.action_manager.llh_manager.previous_time)
 
         # 获取原本的时间,用于评估

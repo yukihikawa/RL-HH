@@ -53,7 +53,7 @@ class action:
             # 解码
             current_time = timeTaken(current_solution, self.llh_manager.parameters)
             # 局部搜索
-            proposal_solution, proposal_time = self.local_search(current_solution, current_time)
+            proposal_solution, proposal_time = self.local_search_vnd(current_solution, current_time)
             # delta_f = proposal_time - self.llh_manager.previous_time
             # 移动接受
             Move_acceptance(proposal_solution, proposal_time)
@@ -63,7 +63,7 @@ class action:
 
 
     #局部搜索,遵循 VND 过程
-    def local_search(self, current_solution, current_time):
+    def local_search_vnd(self, current_solution, current_time):
         # 局部搜索算子重排序,长度为 llh_manager.vnd的长度
         ls_operators = [i for i in range(len(self.llh_manager.vnd))]
         random.shuffle(ls_operators)
@@ -89,6 +89,29 @@ class action:
 
         # print('terminated! proposal: ', proposal_time)
         return proposal_solution, proposal_time
+
+    def local_search(self, current_solution, current_time):
+        # 局部搜索算子重排序,长度为 llh_manager.vnd的长度
+        ls_operators = [i for i in range(len(self.llh_manager.vnd))]
+        random.shuffle(ls_operators)
+        idx = random.randint(0, len(ls_operators) - 1)
+        #本循环内的解和时间
+        proposal_solution = (current_solution[0].copy(), current_solution[1].copy())
+        proposal_time = current_time
+        # 选择算子
+        operator = ls_operators[idx]
+        # 生成新解,评估新解时间
+        new_solution = self.llh_manager.vnd[operator](proposal_solution)
+        new_time = timeTaken(new_solution, self.llh_manager.parameters)
+        # 接受新解
+        if proposal_time > new_time:
+            self.total_improvement += (proposal_time - new_time)
+            self.improvement_iter += 1
+            proposal_solution = new_solution
+            proposal_time = new_time
+        # print('terminated! proposal: ', proposal_time)
+        return proposal_solution, proposal_time
+
 
 
 
