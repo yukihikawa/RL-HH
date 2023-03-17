@@ -18,7 +18,7 @@ PROBLEM = 'MK10'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
-RENDER_TIMES = 10
+RENDER_TIMES = 20
 ACTOR_PATH = f"./vns_env-v0_DQN_0_MK06_VNS-ILS"
 MODULE = '/actor__000000005632_00050.000.pt'
 STATE = 'single'
@@ -40,8 +40,8 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
         'train': False,
-        'time_limit': 35,
-        'NoE': 20,
+        'time_limit': 60,
+        'NoE': 35,
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
