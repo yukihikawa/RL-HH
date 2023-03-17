@@ -14,7 +14,7 @@ from src.HLS.ILS.actionILS import action
 
 gym.logger.set_level(40)  # Block warning
 
-PROBLEM = 'MK07'
+PROBLEM = 'MK09'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 LLH_SET = 'VNS-ILS'
 SOLVE_ITER = 2000
@@ -40,8 +40,8 @@ def run_dqn_for_hyper_heuristic(gpu_id=0):
         'llh_set': LLH_SET,
         'solve_iter': SOLVE_ITER,
         'train': False,
-        'time_limit': 60,
-        'NoE': 35,
+        'time_limit': 35,
+        'NoE': 20,
     }
     # get_gym_env_args(env=gym.make('hh_env-v0'), if_print=True)  # return env_args
 
