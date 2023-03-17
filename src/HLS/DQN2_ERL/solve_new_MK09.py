@@ -15,7 +15,7 @@ gym.logger.set_level(40)  # Block warning
 
 PROBLEM = 'MK09'
 LLH_SET = 1
-SOLVE_ITER = 5000
+SOLVE_ITER = 9000
 RENDER_TIMES = 20
 ACTOR_PATH = f"./hh_env-v0_DQN_0_MK10"
 MODULE = '/actor__000000000512_00181.165.pt'

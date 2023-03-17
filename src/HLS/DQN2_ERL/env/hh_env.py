@@ -73,7 +73,7 @@ class hh_env(gym.Env):
         reward = self.reward3B(newTime)
         #print(" newTime: ", newTime)
         # 解的接受
-        self.accept(newTime, newSolution, action_c)
+        self.acceptOI(newTime, newSolution, action_c)
 
         #newstate2
         delta = self.prevTime - newTime
@@ -135,6 +135,44 @@ class hh_env(gym.Env):
             self.NOT_ACCEPTED += 1
             self.NOT_IMPROVED += 1
 
+    def acceptOI(self, newTime, newSolution, action):
+        if self.prevTime > newTime:
+            self.improveCount[action] += 1
+            self.solution = newSolution
+            self.prevTime = newTime
+            if (self.bestTime > newTime):
+                self.best_solution = newSolution
+                self.bestTime = newTime
+                print("iter: ", self.ITER, "new bestTime: ", self.bestTime)
+            # self.NOT_ACCEPTED = 1
+            # self.NOT_IMPROVED = 1
+        # elif self.prevTime < newTime:
+        #     self.NOT_IMPROVED += 1
+        #     #print(' ')
+        #     #print('ori prevTime: ', self.prevTime, 'newTime: ', newTime)
+        #     # 解的接受
+        #     p = random.random()
+        #     #模拟退火
+        #     temp = math.exp(-(newTime - self.prevTime) / (self.NOT_ACCEPTED *0.01))
+        #     #print('NOT_IMPROVED: ', self.NOT_IMPROVED, 'temp: ', temp, 'p: ', p)
+        #     if p < temp:
+        #         #print('accepted!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        #
+        #         self.solution = newSolution
+        #         self.prevTime = newTime
+        #         #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
+        #         self.NOT_ACCEPTED = 1
+        #         self.NOT_IMPROVED += 1
+        #     else:
+        #         #print('declined!!!!!!!!!')
+        #         self.NOT_ACCEPTED += 1
+        #         self.NOT_IMPROVED += 1
+        # else:
+        #     self.solution = newSolution
+        #     self.prevTime = newTime
+        #     #print('new prevTime: ', self.prevTime, 'newTime: ', newTime)
+        #     self.NOT_ACCEPTED += 1
+        #     self.NOT_IMPROVED += 1
     def reward3(self, newTime):
         if self.prevTime > newTime:
             reward =  self.TERMINATION_TIME / (newTime - self.TERMINATION_TIME + 1)
@@ -228,13 +266,13 @@ class hh_env(gym.Env):
         # print('heuristic no: ', self.heuristicNo)
         # gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
         # gantt.draw_chart(gantt_data)
-        plt.title("MK06")
-        x = range(len(self.step_result))
-        plt.plot(x, self.step_result)  # o-:圆形
-        plt.xlabel("ITER")  # 横坐标名字
-        plt.ylabel("BestTime")  # 纵坐标名字
-        # plt.legend(loc="best")  # 图例
-        plt.show()
+        # plt.title("MK06")
+        # x = range(len(self.step_result))
+        # plt.plot(x, self.step_result)  # o-:圆形
+        # plt.xlabel("ITER")  # 横坐标名字
+        # plt.ylabel("BestTime")  # 纵坐标名字
+        # # plt.legend(loc="best")  # 图例
+        # plt.show()
 
     def close(self):
         pass
