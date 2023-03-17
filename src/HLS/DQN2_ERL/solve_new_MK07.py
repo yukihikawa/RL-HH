@@ -19,6 +19,8 @@ SOLVE_ITER = 9000
 RENDER_TIMES = 20
 ACTOR_PATH = f"./hh_env-v0_DQN_0_MK02"
 MODULE = '/actor__000000307712.pt'
+# ACTOR_PATH = f"./hh_env-v0_DQN_0_MK01"
+# MODULE = '/actor__000000000512_01200.000.pt'
 STATE = 'cla'
 REWARD = 'reward3 + endReward4'
 

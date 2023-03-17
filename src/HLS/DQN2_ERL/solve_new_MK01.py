@@ -17,8 +17,10 @@ PROBLEM = 'MK01'
 LLH_SET = 1
 SOLVE_ITER = 9000
 RENDER_TIMES = 20
-ACTOR_PATH = f"./hh_env-v0_DQN_0_MK02"
-MODULE = '/actor__000000307712.pt'
+# ACTOR_PATH = f"./hh_env-v0_DQN_0_MK02"
+# MODULE = '/actor__000000307712.pt'
+ACTOR_PATH = f"./hh_env-v0_DQN_0_MK01"
+MODULE = '/actor__000000236032.pt'
 STATE = 'cla'
 REWARD = 'reward3 + endReward4'
 
