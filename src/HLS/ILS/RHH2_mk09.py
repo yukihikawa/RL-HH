@@ -7,7 +7,7 @@ from src.LLH.LLHUtils import timeTaken
 PROBLEM = 'MK09'
 PROBLEM_PATH = os.path.join(os.getcwd(), "../../Brandimarte_Data/" + PROBLEM + ".fjs")
 holder = LLHSetILS()
-RENDER_TIMES = 20
+RENDER_TIMES = 9
 ITER = 9000
 
 results = []
