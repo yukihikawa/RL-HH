@@ -71,7 +71,8 @@ class hh_env(gym.Env):
         termination = self.termination()
 
         # 奖励
-        reward = self.reward3B(newTime)
+        # reward = self.reward3B(newTime)
+        reward = self.reward3D(newTime) #配合OI策略使用
         #print(" newTime: ", newTime)
         # 解的接受
         self.accept(newTime, newSolution, action_c)
@@ -145,8 +146,11 @@ class hh_env(gym.Env):
                 self.best_solution = newSolution
                 self.bestTime = newTime
                 print("iter: ", self.ITER, "new bestTime: ", self.bestTime)
-            # self.NOT_ACCEPTED = 1
-            # self.NOT_IMPROVED = 1
+            self.NOT_ACCEPTED = 1
+            self.NOT_IMPROVED = 1
+        else:
+            self.NOT_ACCEPTED += 1
+            self.NOT_IMPROVED += 1
         # elif self.prevTime < newTime:
         #     self.NOT_IMPROVED += 1
         #     #print(' ')
@@ -214,6 +218,16 @@ class hh_env(gym.Env):
             else:
                 reward = 0
             self.rewardMut += reward
+        return reward
+
+    def reward3D(self, newTime):
+        if self.prevTime > newTime:
+            reward = 10
+            if self.bestTime > newTime:
+                reward = 100
+            self.rewardImp += reward
+        else:
+            reward = 0
         return reward
     def endReward4(self):
         #BestTime越小,奖励值越高
