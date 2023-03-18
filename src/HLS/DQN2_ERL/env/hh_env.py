@@ -61,6 +61,7 @@ class hh_env(gym.Env):
 
         #action_c = np.argmax(action)
         action_c = action
+        # action_c = random.randint(0, len(self.heuristics) - 1)
         self.callCount[action_c] += 1
         self.ITER += 1
         newSolution = self.heuristics[action_c](self.solution, self.parameters)
@@ -73,7 +74,7 @@ class hh_env(gym.Env):
         reward = self.reward3B(newTime)
         #print(" newTime: ", newTime)
         # 解的接受
-        self.acceptOI(newTime, newSolution, action_c)
+        self.accept(newTime, newSolution, action_c)
 
         #newstate2
         delta = self.prevTime - newTime
