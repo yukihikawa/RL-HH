@@ -10,8 +10,7 @@ import src.LLH.LLHUtils as llh
 import src.utils.encoding as encoding
 from src.HLS.DQN2_ERL.train import config
 from src.LLH.LLHolder import LLHolder
-from src.utils import parser
-
+from src.utils import parser, decoding, gantt
 
 #10个问题的最优解区间
 IDEAL_TIME = {'MK01': (36, 42), 'MK02': (27, 32), 'MK03': (204, 211), 'MK04': (60, 81), 'MK05': (168, 186), 'MK06': (60, 86), 'MK07': (133, 157), 'MK08': (523, 523), 'MK09': (299, 369), 'MK10': (165, 296)}
@@ -279,8 +278,8 @@ class hh_env(gym.Env):
         # print('iter: ', self.iter_type)
         # print('heuristic type: ', self.heuristicType)
         # print('heuristic no: ', self.heuristicNo)
-        # gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
-        # gantt.draw_chart(gantt_data)
+        gantt_data = decoding.translate_decoded_to_gantt(decoding.decode(self.parameters, self.best_solution[0], self.best_solution[1]))
+        gantt.draw_chart(gantt_data)
         # plt.title("MK06")
         # x = range(len(self.step_result))
         # plt.plot(x, self.step_result)  # o-:圆形
